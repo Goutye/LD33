@@ -50,8 +50,8 @@ function GameScreen:initialize(level, gamedata)
 	self.slices[1]:addEntity(FireSlime:new(256, 256, EasyLD.area:new(EasyLD.circle:new(256, 256, 16))))
 
 	self.slices[2]:addEntity(FireSlime:new(64, 128, EasyLD.area:new(EasyLD.circle:new(64, 128, 16))))
-	self.slices[2]:addEntity(ExplodeSlime:new(128, 256, EasyLD.area:new(EasyLD.circle:new(128, 256, 16))))
-	self.slices[2]:addEntity(PushSlime:new(256, 256, EasyLD.area:new(EasyLD.circle:new(256, 256, 16))))
+	self.slices[2]:addEntity(ExplodeSlime:new(128, 288, EasyLD.area:new(EasyLD.circle:new(128, 288, 16))))
+	self.slices[2]:addEntity(PushSlime:new(64, 400, EasyLD.area:new(EasyLD.circle:new(64, 400, 16))))
 
 	self.slices[3]:addEntity(Treasure:new(736 + 128, 512, EasyLD.area:new(EasyLD.box:new(736 + 128, 512, 16, 16, EasyLD.color:new(0,255,0)))))
 
@@ -76,7 +76,7 @@ function GameScreen:initialize(level, gamedata)
 	self.nbFloors = #self.floors
 
 	self.isNewFloor = true
-	self.timeEntrance = 3
+	self.timeEntrance = 4
 end
 
 function GameScreen:preCalcul(dt)
@@ -88,7 +88,7 @@ function GameScreen:preCalcul(dt)
 		elseif self.timeEntrance > 3 then
 			return dt
 		elseif self.timeEntrance < 0.09 then
-			return dt * (1 - self.timeEntrance)
+			return dt * (0.1 - self.timeEntrance)*10
 		else
 			return dt * 0.01
 		end

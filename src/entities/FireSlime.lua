@@ -5,7 +5,7 @@ local FireSlime = class('FireSlime', Entity)
 
 function FireSlime:load()
 	self.isPlayer = false
-	self.power = 100
+	self.power = 150
 	self.dmg = 5
 	self.life = 10
 	self.maxLife = 10
@@ -16,8 +16,8 @@ function FireSlime:load()
 
 	self.PS = EasyLD.particles:new(self.pos, "assets/smoke.png")
 	self.PS:setEmissionRate(100)
-	self.PS:setLifeTime(0.5)
-	self.PS:setInitialVelocity(200)
+	self.PS:setLifeTime(0.3)
+	self.PS:setInitialVelocity(150)
 	self.PS:setInitialAcceleration(0)
 	self.PS:setDuration(self.reloadTime)
 	self.PS:setDirection(0, math.pi/36)

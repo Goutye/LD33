@@ -8,9 +8,9 @@ function Hero:load(level)
 	self.isHero = true
 	self.level = level
 	self.distance = 50
-	self.dmg = 10 + level * 2
-	self.life = 100 + level * 10
-	self.maxLife = 100 + level * 10
+	self.dmg = 5 + level * 2
+	self.life = 20 + level * 10
+	self.maxLife = 20 + level * 10
 	self.choice = nil
 	self.canAttack = true
 	self.reloadTime = 0.5 - level *0.01
@@ -22,7 +22,7 @@ function Hero:load(level)
 	self.PS = EasyLD.particles:new(self.pos, "assets/smoke.png")
 	self.PS:setEmissionRate({[0] = 20, [1] = 1}, {"quadout"})
 	self.PS:setLifeTime(1)
-	self.PS:setInitialVelocity(50)
+	self.PS:setInitialVelocity(30)
 	self.PS:setInitialAcceleration(-50)
 	self.PS:setDirection(0, math.pi * 2)
 	self.PS:setColors({[0] = EasyLD.color:new(255,255,255,200),
@@ -221,7 +221,7 @@ function Hero:speak(text, time)
 end
 
 function Hero:isLanding()
-	self.PS:emit(70)
+	self.PS:emit(20)
 end
 
 function Hero:draw()
