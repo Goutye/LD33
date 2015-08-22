@@ -50,6 +50,7 @@ function GameScreen:initialize()
 	DM:addDepth(1, 0.75, self.slices[2], 220)
 	DM:addDepth(2, 0.75, self.slices[3], 220)
 	DM:centerOn(400, 300)
+	
 end
 
 function GameScreen:preCalcul(dt)
