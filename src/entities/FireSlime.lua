@@ -5,7 +5,7 @@ local FireSlime = class('FireSlime', Entity)
 
 function FireSlime:load()
 	self.isPlayer = false
-	self.power = 150
+	self.power = 100
 	self.dmg = 5
 	self.life = 10
 	self.maxLife = 10
@@ -16,8 +16,8 @@ function FireSlime:load()
 
 	self.PS = EasyLD.particles:new(self.pos, "assets/smoke.png")
 	self.PS:setEmissionRate(100)
-	self.PS:setLifeTime(0.3)
-	self.PS:setInitialVelocity(150)
+	self.PS:setLifeTime(0.4)
+	self.PS:setInitialVelocity(200)
 	self.PS:setInitialAcceleration(0)
 	self.PS:setDuration(self.reloadTime)
 	self.PS:setDirection(0, math.pi/36)
@@ -135,7 +135,7 @@ function FireSlime:draw()
 		self.collideArea.forms[1].c = EasyLD.color:new(255,255,255)
 	end
 
-	font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))
+	--font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))
 end
 
 return FireSlime

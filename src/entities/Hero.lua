@@ -19,7 +19,7 @@ function Hero:load(level)
 
 	self.swordSegment = EasyLD.segment:new(self.pos:copy(), self.pos:copy())
 
-	self.PS = EasyLD.particles:new(self.pos, "assets/smoke.png")
+	self.PS = EasyLD.particles:new(self.pos, "assets/smoke2.png")
 	self.PS:setEmissionRate({[0] = 20, [1] = 1}, {"quadout"})
 	self.PS:setLifeTime(1)
 	self.PS:setInitialVelocity(30)
@@ -30,6 +30,19 @@ function Hero:load(level)
 	self.PS:setSizes({[0] = 64,
 						[1] = 16})
 	self.PS:start()
+
+	self.timeBeforeRunning = 1
+
+	self.randomStringOnKill = {"One more for the light!",
+								"Eats this, heinous monster!",
+								"You will never be able to reign here!",
+								"Is this all you got?",
+								"Bless the sun!",
+								"Umaru-chan, please notice me!",
+								"By the divine hammer!",
+								"Anduin will claim your soul!"}
+	self.randomStringOnDeath = {"Arrrrrggggggggh. The light... The light should have come back...",
+								".. I can only see black... darkness every...where..."}
 end
 
 function Hero:update(dt, entities, map)
@@ -52,6 +65,11 @@ function Hero:update(dt, entities, map)
 			EasyLD.timer.cancel(self.timer)
 			self.timer = nil
 		end
+	end
+
+	if self.timeBeforeRunning > 0 then
+		self.timeBeforeRunning = self.timeBeforeRunning - dt
+		return
 	end
 
 	local direction = self:findPath(map, self.choice.pos)
@@ -153,18 +171,17 @@ function Hero:attack(entities)
 	for _,e in ipairs(entities) do
 		if e.id ~= self.id and self.swordSegment:collide(e.collideArea) then
 			if e:takeDmg(self.dmg) then
-				self:speak("One more!", 1)
+				self:speak(self.randomStringOnKill[math.random(1,#self.randomStringOnKill)], 1.5)
 			end
 		end
 	end
 end
 
 function Hero:onDeath()
-
+	self:speak(self.randomStringOnDeath[math.random(1, #self.randomStringOnDeath)], 2.5)
 end
 
 function Hero:onCollide(entity)
-
 end
 
 function Hero:addPointOfInterest(pointOfInterest)
@@ -237,7 +254,7 @@ function Hero:draw()
 		self.swordSegment:draw()
 	end
 
-	font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))
+	--font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))
 end
 
 return Hero

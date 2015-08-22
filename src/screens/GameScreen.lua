@@ -104,9 +104,12 @@ function GameScreen:update(dt)
 		if self.hero:hasGotTreasure() then
 			print("end")
 		end
-	elseif self.hero.isDead and not self.newScreen then
-		self.newScreen = true
-		EasyLD:nextScreen(GameScreen:new(self.hero.level + 1, {floors = self.floors}), "fade", nil, 2, true, "quad")
+	elseif self.hero.isDead and not self.newScreen and not self.timerNewScreen then
+		self.timerNewScreen = EasyLD.timer.after(0.5, function()
+			self.newScreen = true
+			self.timerNewScreen = nil
+			EasyLD:nextScreen(GameScreen:new(self.hero.level + 1, {floors = self.floors}), "fade", nil, 2, true, "quad")
+		end	)
 	elseif self.hero:isPointOfInterestReached(self.maps[self.player.depth + 1]) then
 		self.slices[self.player.depth + 1]:removeEntity(self.hero)
 		self.slices[self.player.depth + 2]:addEntity(self.hero)
@@ -114,6 +117,7 @@ function GameScreen:update(dt)
 		self.hero:addPointOfInterest(self.maps[self.player.depth + 2].pointOfInterest)
 		self.hero.canAttack = true
 		self.hero.choice = nil
+		self.hero.timeBeforeRunning = 2
 		self.hero:isLanding()
 
 		self.timer = EasyLD.flux.to(DM.depth[self.player.depth + 1], 2, {ratio = 1}):ease("backin")

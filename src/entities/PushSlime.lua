@@ -158,7 +158,7 @@ function PushSlime:draw()
 		self.collideArea.forms[1].c = EasyLD.color:new(200,200,200)
 	end
 
-	font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))
+	--font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))
 end
 
 return PushSlime
