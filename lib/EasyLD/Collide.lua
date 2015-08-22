@@ -399,6 +399,13 @@ function Collide:AABB_circle(box, circle, boolReturnPos)
 	end
 end
 
+function Collide:Circle_inAABB(circle, box)
+	return circle.x - circle.r >= box.x
+		and circle.y - circle.r >= box.y
+		and circle.x + circle.r <= box.x + box.w-1
+		and circle.y + circle.r <= box.y + box.h-1
+end
+
 function Collide:AABB_inCircle(box, circle, boolReturnPos)
 	local pos = {}
 	
@@ -430,6 +437,13 @@ function Collide:AABB_AABB(box1, box2)
 		and box2.x + box2.w -1	>= box1.x 
 		and box2.y 				<= box1.y + box1.h -1
 		and box2.y + box2.h -1	>= box1.y
+end
+
+function Collide:AABB_inAABB(box1, box2)
+	return box1.x >= box2.x
+		and box1.y >= box2.y
+		and box1.x + box1.w <= box2.x + box2.w
+		and box1.y + box1.h <= box2.x + box2.h
 end
 
 function Collide:Circle_point(circle, point)

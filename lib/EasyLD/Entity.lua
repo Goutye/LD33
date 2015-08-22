@@ -18,6 +18,9 @@ function Entity:initialize(x, y, collideArea, spriteAnimation)
 	self.life = 0
 	self.maxLife = 0
 
+	self.invincible = false
+	self.timeBeforeNextDmg = 0.5
+
 	self:load()
 end
 
@@ -31,6 +34,7 @@ function Entity:copy()
 	e.onDeath = self.onDeath
 	e.onCollide = self.onCollide
 	e.draw = self.draw
+	e.drawUI = self.drawUI
 	e.load = self.load
 	e:load()
 
@@ -120,11 +124,20 @@ function Entity:draw()
 	end
 end
 
+function Entity:drawUI()
+
+end
+
 function Entity:takeDmg(dmg)
-	self.life = self.life - dmg
-	if self.life <= 0 then
-		self.isDead = true
-		self.life = 0
+	if not self.invincible then
+		self.invincible = true
+		self.timerInvincible = EasyLD.timer.after(self.timeBeforeNextDmg, function() self.timerInvincible, self.invincible = nil, false end)
+		self.life = self.life - dmg
+		if self.life <= 0 then
+			self.isDead = true
+			self.life = 0
+			return true
+		end
 	end
 end
 

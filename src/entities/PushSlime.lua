@@ -11,10 +11,13 @@ function PushSlime:load()
 	self.life = 10
 	self.maxLife = 10
 
-	self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos:copy())
+	self.timePush = 2
+	self.timePushFull = 2
+
+	self.pushPolygon = EasyLD.polygon:new("fill", EasyLD.color:new(255,0,0,200), self.pos:copy(), self.pos:copy(), self.pos:copy())
 end
 
-function PushSlime:update(dt, entities)
+function PushSlime:update(dt, entities, map)
 	local ACCELERATION = 1000
 
 	self.acceleration = EasyLD.point:new(0, 0)
@@ -43,11 +46,44 @@ function PushSlime:update(dt, entities)
 
 		self.pushPolygon = EasyLD.polygon:new("fill", EasyLD.color:new(255,0,0,200), p1, p2, self.pos:copy())
 		
-		if EasyLD.mouse:isDown("l") then
+		if EasyLD.mouse:isDown("l") and self.timePush > 0 then
 			self:push(entities)
+			self.timePush = self.timePush - dt
+			if self.timePush <= 0 then
+				self.timerPush = EasyLD.timer.after(self.timePushFull + self.timePush, function() self.timerPush, self.timePush = nil, self.timePushFull end)
+			end
 		end
 	else
+		if self.timePush > 0 then
+			local vectorPush = EasyLD.vector:of(self.pos, DM:getMousePos())
+			vectorPush:normalize()
+			vectorPush = vectorPush * self.distance
+			local vectorNormal = vectorPush:normal() * .5
+			local p1 = self.pos + vectorPush
+			local p2 = p1:copy()
+			p1, p2 = p1 - vectorNormal, p2 + vectorNormal
+			self.pushPolygon = EasyLD.polygon:new("fill", EasyLD.color:new(255,0,0,200), p1, p2, self.pos:copy())
+			if self.hero == nil then
+				for _,e in ipairs(entities) do
+					if e.level ~= nil then
+						self.hero = e
+						break
+					end
+				end
+			end
 
+			if self.hero ~= nil and self.hero.collideArea:collide(self.pushPolygon) then
+				self:push(entities)
+				self.timePush = self.timePush - dt
+				if self.timePush <= 0 then
+					self.timerPush = EasyLD.timer.after(self.timePushFull + self.timePush, function() self.timerPush, self.timePush = nil, self.timePushFull end)
+				end
+			end
+		end
+	end
+
+	if map:collideHole(self.collideArea) then
+		self:takeDmg(5)
 	end
 end
 
@@ -69,6 +105,13 @@ function PushSlime:onCollide(entity)
 
 end
 
+function PushSlime:drawUI()
+	local ratio = self.life/self.maxLife
+	local r = self.collideArea.forms[1].r
+	local lifeBox = EasyLD.box:new(self.pos.x - r, self.pos.y - 3*r/2, r * 2 * ratio , 2, EasyLD.color:new(255,0,0))
+	lifeBox:draw()
+end
+
 function PushSlime:draw()
 	if self.spriteAnimation ~= nil then
 		self.spriteAnimation:draw(self.pos)
@@ -76,7 +119,7 @@ function PushSlime:draw()
 		self.collideArea:draw() --Comment this line for real, if test, uncomment
 	end
 
-	if self.isPlayer then
+	if self.timePush > 0 then
 		self.pushPolygon:draw()
 	end
 

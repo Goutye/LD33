@@ -146,9 +146,9 @@ function Area:collidePolygon(poly)
 	return false
 end
 
-function Area:collideBox(b)
+function Area:collideBox(b, inside)
 	for _,f in ipairs(self.forms) do
-		if f:collideBox(b) then
+		if f:collideBox(b, inside) then
 			return true
 		end
 	end

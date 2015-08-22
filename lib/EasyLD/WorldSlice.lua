@@ -20,7 +20,7 @@ end
 function WorldSlice:update(dt)
 	for _,entity in ipairs(self.entities) do
 		local oldY = math.floor(entity.pos.y)
-		entity:update(dt, self.entities)
+		entity:update(dt, self.entities, self.map)
 		entity:tryMove(dt, self.map, self.entities)
 		local newY = math.floor(entity.pos.y)
 		if oldY ~= newY then
@@ -38,11 +38,13 @@ function WorldSlice:update(dt)
 		end
 	end
 
+	local nbOfRemoved = 0
 	for _,id in ipairs(deadEntities) do
-		table.remove(self.entities, id)
-		for i = id, #self.entities do
+		table.remove(self.entities, id - nbOfRemoved)
+		for i = id - nbOfRemoved, #self.entities do
 			self.entities[i].id = i
 		end
+		nbOfRemoved = nbOfRemoved + 1
 	end
 
 	self:updatePost(dt, self.entities)
@@ -57,6 +59,12 @@ function WorldSlice:draw()
 	for i = self.offset.y, self.offset.y + self.mapHeight - 1 do
 		for _,entity in pairs(self.entitiesOrder[i]) do
 			entity:draw()
+		end
+	end
+
+	for i = self.offset.y, self.offset.y + self.mapHeight - 1 do
+		for _,entity in pairs(self.entitiesOrder[i]) do
+			entity:drawUI()
 		end
 	end
 end

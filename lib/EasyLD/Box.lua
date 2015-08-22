@@ -126,8 +126,8 @@ function Box:rotate(angle, ox, oy)
 end
 
 --EasyLD.collide functions
-function Box:collide(area)
-	return area:collideBox(self)
+function Box:collide(area, inside)
+	return area:collideBox(self, inside)
 end
 
 function Box:collideArea(area)
@@ -138,8 +138,10 @@ function Box:collidePolygon(poly)
 	return EasyLD.collide:Polygon_OBB(poly, self)
 end
 
-function Box:collideBox(b)
-	if self.angle == 0 and b.angle == 0 then
+function Box:collideBox(b, inside)
+	if inside then
+		return EasyLD.collide:AABB_inAABB(self, b)
+	elseif self.angle == 0 and b.angle == 0 then
 		return EasyLD.collide:AABB_AABB(self, b)
 	else
 		return EasyLD.collide:OBB_OBB(self, b)

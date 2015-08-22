@@ -9,11 +9,13 @@ function FireSlime:load()
 	self.dmg = 5
 	self.life = 10
 	self.maxLife = 10
-
+	self.canAttack = true
+	self.reloadTime = 1
+	self.vectorFire = EasyLD.vector:new(0,0)
 	self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos:copy())
 end
 
-function FireSlime:update(dt, entities)
+function FireSlime:update(dt, entities, map)
 	local ACCELERATION = 1000
 
 	self.acceleration = EasyLD.point:new(0, 0)
@@ -32,15 +34,35 @@ function FireSlime:update(dt, entities)
 			self.acceleration.y = self.acceleration.y + ACCELERATION
 		end
 
-		local vectorFire = EasyLD.vector:of(self.pos, DM:getMousePos())
-		vectorFire:normalize()
-		self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos + (vectorFire * self.power), EasyLD.color:new(255,0,0))
+		self.vectorFire = EasyLD.vector:of(self.pos, DM:getMousePos())
+		self.vectorFire:normalize()
+		self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos + (self.vectorFire * self.power), EasyLD.color:new(255,0,0))
 		
 		if EasyLD.mouse:isPressed("l") then
 			self:fire(entities)
 		end
-	else
+	elseif self.canAttack then
+		self.vectorFire = EasyLD.vector:of(self.pos, DM:getMousePos())
+		self.vectorFire:normalize()
+		self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos + (self.vectorFire * self.power), EasyLD.color:new(255,0,0))
+		if self.hero == nil then
+			for _,e in ipairs(entities) do
+				if e.level ~= nil then
+					self.hero = e
+					break
+				end
+			end
+		end
 
+		if self.hero ~= nil and self.hero.collideArea:collide(self.fireSegment) then
+			self.canAttack = false
+			self.timerAttack = EasyLD.timer.after(self.reloadTime, function() self.timerAttack, self.canAttack = nil, true end)
+			self:fire(entities)
+		end
+	end
+
+	if map:collideHole(self.collideArea) then
+		self:takeDmg(5)
 	end
 end
 
@@ -48,6 +70,8 @@ function FireSlime:fire(entities)
 	for _,e in ipairs(entities) do
 		if e.id ~= self.id and self.fireSegment:collide(e.collideArea) then
 			e:takeDmg(self.dmg)
+			local normal = self.vectorFire:normal()
+			e.speed = e.speed + normal * ((math.random(0,1) -0.5) *2 * self.power) 
 		end
 	end
 end
@@ -58,6 +82,13 @@ end
 
 function FireSlime:onCollide(entity)
 
+end
+
+function FireSlime:drawUI()
+	local ratio = self.life/self.maxLife
+	local r = self.collideArea.forms[1].r
+	local lifeBox = EasyLD.box:new(self.pos.x - r, self.pos.y - 3*r/2, r * 2 * ratio , 2, EasyLD.color:new(255,0,0))
+	lifeBox:draw()
 end
 
 function FireSlime:draw()

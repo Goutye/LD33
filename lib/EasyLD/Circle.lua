@@ -96,8 +96,10 @@ function Circle:collidePolygon(poly)
 	return EasyLD.collide:Polygon_circle(poly, self)
 end
 
-function Circle:collideBox(b)
-	if b.angle == 0 then
+function Circle:collideBox(b, inside)
+	if inside then
+		return EasyLD.collide:Circle_inAABB(self, b)
+	elseif b.angle == 0 then
 		return EasyLD.collide:AABB_circle(b, self)
 	else
 		return EasyLD.collide:OBB_circle(b, self)

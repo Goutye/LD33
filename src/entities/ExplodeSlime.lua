@@ -6,14 +6,17 @@ local ExplodeSlime = class('ExplodeSlime', Entity)
 function ExplodeSlime:load()
 	self.isPlayer = false
 	self.power = 150
-	self.dmg = 0
+	self.dmg = 20
 	self.life = 10
 	self.maxLife = 10
 
-	self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos:copy())
+	self.randomRatio = 0
+	self.timeNextRandom = 0.2
+
+	self.explodeCircle = EasyLD.circle:new(self.pos.x, self.pos.y, self.power, EasyLD.color:new(255, 0, 0, 200))
 end
 
-function ExplodeSlime:update(dt, entities)
+function ExplodeSlime:update(dt, entities, map)
 	local ACCELERATION = 1000
 
 	self.acceleration = EasyLD.point:new(0, 0)
@@ -38,7 +41,27 @@ function ExplodeSlime:update(dt, entities)
 			self:explode(entities)
 		end
 	else
+		self.explodeCircle = EasyLD.circle:new(self.pos.x, self.pos.y, self.power * self.randomRatio, EasyLD.color:new(255, 0, 0, 200))
+		if self.hero == nil then
+			for _,e in ipairs(entities) do
+				if e.level ~= nil then
+					self.hero = e
+					break
+				end
+			end
+		end
 
+		if self.timerRandom == nil then
+			self.timerRandom = EasyLD.timer.after(self.timeNextRandom, function() self.timerRandom, self.randomRatio = nil, math.random() * 0.8 + 0.1 end)
+		end
+
+		if self.hero ~= nil and self.hero.collideArea:collide(self.explodeCircle) then
+			self:explode(entities)
+		end
+	end
+
+	if map:collideHole(self.collideArea) then
+		self:takeDmg(5)
 	end
 end
 
@@ -53,6 +76,7 @@ function ExplodeSlime:explode(entities)
 			e.speed = e.speed + (dir * ratio * self.power * 6)
 		end
 	end
+	self:takeDmg(self.dmg)
 end
 
 function ExplodeSlime:onDeath()
@@ -61,6 +85,13 @@ end
 
 function ExplodeSlime:onCollide(entity)
 
+end
+
+function ExplodeSlime:drawUI()
+	local ratio = self.life/self.maxLife
+	local r = self.collideArea.forms[1].r
+	local lifeBox = EasyLD.box:new(self.pos.x - r, self.pos.y - 3*r/2, r * 2 * ratio , 2, EasyLD.color:new(255,0,0))
+	lifeBox:draw()
 end
 
 function ExplodeSlime:draw()

@@ -24,8 +24,8 @@ function DepthManager:follow(obj, mode, time, typeEase)
 			self.timer2:stop()
 		end
 		self.timer2 = EasyLD.flux.to(self.pos, time or 0.8, {x = self.follower.pos, y = self.follower.pos}, "follower"):ease(typeEase or "quadout"):oncomplete(function()  
-																					self.timer2 = nil
-																				end)
+														self.timer2 = nil
+													end)
 	end
 end
 
