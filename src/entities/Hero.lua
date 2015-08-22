@@ -18,6 +18,18 @@ function Hero:load(level)
 	self.gotTresure = false
 
 	self.swordSegment = EasyLD.segment:new(self.pos:copy(), self.pos:copy())
+
+	self.PS = EasyLD.particles:new(self.pos, "assets/smoke.png")
+	self.PS:setEmissionRate({[0] = 20, [1] = 1}, {"quadout"})
+	self.PS:setLifeTime(1)
+	self.PS:setInitialVelocity(50)
+	self.PS:setInitialAcceleration(-50)
+	self.PS:setDirection(0, math.pi * 2)
+	self.PS:setColors({[0] = EasyLD.color:new(255,255,255,200),
+						[1] = EasyLD.color:new(255,255,255,0)})
+	self.PS:setSizes({[0] = 64,
+						[1] = 16})
+	self.PS:start()
 end
 
 function Hero:update(dt, entities, map)
@@ -68,6 +80,9 @@ function Hero:update(dt, entities, map)
 	if map:collideHole(self.collideArea) then
 		self:takeDmg(5)
 	end
+
+	self.PS.follower:moveTo(self.pos.x, self.pos.y)
+	self.PS:update(dt)
 end
 
 function Hero:findPath(map, goal)
@@ -160,7 +175,7 @@ function Hero:isPointOfInterestReached(map)
 	if self.choice.pos == self.pointOfInterest then
 		if not DM.follower.isHero then
 			self.depth = DM.follower.depth
-			DM:follow(self)
+			DM:follow(self, 0.5)
 			local _,x,y = map:getTilePixel(self.pointOfInterest.x, self.pointOfInterest.y)
 			map:putTile(10, x, y)
 		end
@@ -194,18 +209,24 @@ function Hero:speak(text, time)
 		table.insert(list, EasyLD.point:new(x, y - 16))
 		table.insert(list, EasyLD.point:new(x, y - 36))
 		table.insert(list, EasyLD.point:new(x + 0.4 * size, y - 36))
-		table.insert(list, EasyLD.point:new(x + 0.4 * size, y - 66))
-		table.insert(list, EasyLD.point:new(x - 0.72 * size, y - 66))
+		table.insert(list, EasyLD.point:new(x + 0.4 * size, y - 76))
+		table.insert(list, EasyLD.point:new(x - 0.72 * size, y - 76))
 		table.insert(list, EasyLD.point:new(x - 0.72 * size, y - 36))
 		table.insert(list, EasyLD.point:new(x - 0.05 * size, y - 36))
 		local polygon = EasyLD.polygon:new("fill", EasyLD.color:new(20, 20, 20, 240), unpack(list))
 		polygon:draw()
-		font:print(text, 20, EasyLD.box:new(x - 0.72 * size, y - 61, 1.12 * size, 20), "center", nil, EasyLD.color:new(255,255,255))
+		font:print(text, 20, EasyLD.box:new(x - 0.72 * size, y - 71, 1.12 * size, 20), "center", nil, EasyLD.color:new(255,255,255))
 		end
 	self.timerPopup = EasyLD.timer.after(time or 3, function() self.timerPopup, self.popup = nil, nil end)
 end
 
+function Hero:isLanding()
+	self.PS:emit(70)
+end
+
 function Hero:draw()
+	self.PS:draw()
+
 	if self.spriteAnimation ~= nil then
 		self.spriteAnimation:draw(self.pos)
 	else

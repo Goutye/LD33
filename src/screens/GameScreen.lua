@@ -114,6 +114,7 @@ function GameScreen:update(dt)
 		self.hero:addPointOfInterest(self.maps[self.player.depth + 2].pointOfInterest)
 		self.hero.canAttack = true
 		self.hero.choice = nil
+		self.hero:isLanding()
 
 		self.timer = EasyLD.flux.to(DM.depth[self.player.depth + 1], 2, {ratio = 1}):ease("backin")
 		self.timer2 = EasyLD.flux.to(DM.depth[self.player.depth], 2, {alpha = 0})
@@ -129,7 +130,7 @@ function GameScreen:update(dt)
 		self.timeEntrance = 5
 	end
 
-	if EasyLD.keyboard:isPressed("space") then
+	if EasyLD.keyboard:isPressed("space") or (self.player.isDead and #self.slices[self.player.depth + 1].entities > 1) then
 		local oldId = self.player.id
 		local depth = self.player.depth
 		self.player.isPlayer = false
@@ -140,12 +141,13 @@ function GameScreen:update(dt)
 		self.player = self.slices[depth+1].entities[newId]
 		self.player.isPlayer = true
 		self.player.depth = depth
+		DM:follow(self.player, 0.5)
 	end
 end
 
 function GameScreen:draw()
 	self.DM:draw()
-	EasyLD.postfx:use("vignette", 0.6, 0.1, 0.1)
+	--EasyLD.postfx:use("vignette", 0.6, 0.1, 0.1)
 	font:print("Floors: " .. self.nbFloors, 40, EasyLD.box:new(0,0,EasyLD.window.w, 50), nil, nil, EasyLD.color:new(255,255,255))
 	font:print(self.maps[self.player.depth + 1].name, 60, EasyLD.box:new(0,0,EasyLD.window.w, 50), "center", nil, EasyLD.color:new(255,255,255))
 	font:print(self.hero.level.." :Heros beaten",40, EasyLD.box:new(0,0,EasyLD.window.w, 50), "right", nil, EasyLD.color:new(255,255,255))

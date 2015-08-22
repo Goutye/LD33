@@ -13,6 +13,20 @@ function FireSlime:load()
 	self.reloadTime = 1
 	self.vectorFire = EasyLD.vector:new(0,0)
 	self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos:copy())
+
+	self.PS = EasyLD.particles:new(self.pos, "assets/smoke.png")
+	self.PS:setEmissionRate(100)
+	self.PS:setLifeTime(0.5)
+	self.PS:setInitialVelocity(200)
+	self.PS:setInitialAcceleration(0)
+	self.PS:setDuration(self.reloadTime)
+	self.PS:setDirection(0, math.pi/36)
+	self.PS:setColors({[0] = EasyLD.color:new(0,0,0,200),
+						[0.2] = EasyLD.color:new(255,0,0,200),
+						[1] = EasyLD.color:new(255,2,0,0)})
+	self.PS:setSizes({[0] = 16,
+						[0.2] = 18,
+						[1] = 16})
 end
 
 function FireSlime:update(dt, entities, map)
@@ -36,15 +50,15 @@ function FireSlime:update(dt, entities, map)
 
 		self.vectorFire = EasyLD.vector:of(self.pos, DM:getMousePos())
 		self.vectorFire:normalize()
+		self.PS:setDirection(math.pi * 2 - self.vectorFire:getAngle(), math.pi/36)
 		self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos + (self.vectorFire * self.power), EasyLD.color:new(255,0,0))
 		
-		if EasyLD.mouse:isPressed("l") then
+		if EasyLD.mouse:isPressed("l") and self.canAttack then
+			self.canAttack = false
+			self.timerAttack = EasyLD.timer.after(self.reloadTime, function() self.timerAttack, self.canAttack = nil, true end)
 			self:fire(entities)
 		end
 	elseif self.canAttack then
-		self.vectorFire = EasyLD.vector:of(self.pos, DM:getMousePos())
-		self.vectorFire:normalize()
-		self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos + (self.vectorFire * self.power), EasyLD.color:new(255,0,0))
 		if self.hero == nil then
 			for _,e in ipairs(entities) do
 				if e.level ~= nil then
@@ -52,6 +66,13 @@ function FireSlime:update(dt, entities, map)
 					break
 				end
 			end
+		end
+
+		if self.hero ~= nil then
+			self.vectorFire = EasyLD.vector:of(self.pos, self.hero.pos)
+			self.vectorFire:normalize()
+			self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos + (self.vectorFire * self.power), EasyLD.color:new(255,0,0))
+			self.PS:setDirection(math.pi * 2 - self.vectorFire:getAngle(), math.pi/36)
 		end
 
 		if self.hero ~= nil and self.hero.collideArea:collide(self.fireSegment) then
@@ -64,9 +85,14 @@ function FireSlime:update(dt, entities, map)
 	if map:collideHole(self.collideArea) then
 		self:takeDmg(5)
 	end
+
+	self.PS.follower:moveTo(self.pos:get())
+	self.PS:update(dt)
 end
 
 function FireSlime:fire(entities)
+	self.PS:start()
+	self.timerPS = EasyLD.timer.after(0.5, function() self.PS:stop() end)
 	for _,e in ipairs(entities) do
 		if e.id ~= self.id and self.fireSegment:collide(e.collideArea) then
 			e:takeDmg(self.dmg)
@@ -92,6 +118,7 @@ function FireSlime:drawUI()
 end
 
 function FireSlime:draw()
+	self.PS:draw()
 	if self.spriteAnimation ~= nil then
 		self.spriteAnimation:draw(self.pos)
 	else
@@ -99,7 +126,13 @@ function FireSlime:draw()
 	end
 
 	if self.isPlayer then
-		self.fireSegment:draw()
+		--self.fireSegment:draw()
+	end
+
+	if self.canAttack then
+		self.collideArea.forms[1].c = EasyLD.color:new(255,200,200)
+	else
+		self.collideArea.forms[1].c = EasyLD.color:new(255,255,255)
 	end
 
 	font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))
