@@ -15,7 +15,7 @@ function SFX:play(callback, ...)
 	self.m:stop()
 	self.m:play()
 	if self.callback then
-		self.timer = EasyLD.timer.after(self:getDuration(), callback, ...)
+		self.timer = EasyLD.timer.after(self:getDuration(), self.callback, ...)
 	end
 end
 

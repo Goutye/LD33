@@ -7,17 +7,18 @@ Hero.firstname = {"Tirion", "John", "Sirius", "Sylvanas", "Jaime", "Mike", "Umar
 Hero.lastname = {"Fordring", "Snow", "Black", "Windrunner", "Lannister", "Kazprzak", "chan", "Potter", "Granger", "Weasley", "Suzumiya", "Lamperouge", "Moon"}
 
 function Hero:load(level)
+	if level == nil then return end
 	math.randomseed( os.time() )
-	if level == nil then level = 0 end
-	self.firstname = "Moon"--Hero.firstname[math.random(1, #Hero.firstname)]
-	self.lastname = "Moon"--Hero.lastname[math.random(1, #Hero.lastname)]
+	self.firstname = Hero.firstname[math.random(1, #Hero.firstname)]
+	self.lastname = Hero.lastname[math.random(1, #Hero.lastname)]
+	print(self.firstname)
 	self.name = self.firstname .. " " .. self.lastname
 	self.isHero = true
 	self.level = level
 	self.distance = 50
 	self.dmg = 5 + level * 2
-	self.life = 100 + level * 10
-	self.maxLife = 100 + level * 10
+	self.life = 20 + level * 10
+	self.maxLife = 20 + level * 10
 	self.choice = nil
 	self.canAttack = true
 	self.reloadTime = 0.5 - level *0.01
@@ -50,6 +51,30 @@ function Hero:load(level)
 								"Anduin will claim your soul!"}
 	self.randomStringOnDeath = {"Arrrrrggggggggh. The light... The light should have come back...",
 								".. I can only see black... darkness every...where..."}
+
+	self.sfx = {}
+	self.sfx.enter = EasyLD.sfx:new("assets/sfx/enter.wav", 0.7)
+	self.sfx.isLanding = EasyLD.sfx:new("assets/sfx/isLanding.wav", 0.8)
+
+	self.spriteAnimation = EasyLD.spriteAnimation(self, "assets/sprites/Hero.png", 4, 0.1, 32, 32, 0, -1, "center")
+	self.spriteAnimation:play()
+	self.pAnim = EasyLD.point:new(self.pos.x, self.pos.y, true)
+	self.collideArea:attach(self.pAnim)
+	self.pAnim:attachImg(self.spriteAnimation, "center")
+
+	self.PS2 = EasyLD.particles:new(self.pos, "assets/smoke.png")
+	self.PS2:setEmissionRate(200)
+	self.PS2:setLifeTime(0.1)
+	self.PS2:setInitialVelocity(600)
+	self.PS2:setInitialAcceleration(0)
+	self.PS2:setDirection(0, math.pi/36)
+	self.PS2:setColors({[0] = EasyLD.color:new(255,255,255,150),
+						[0.05] = EasyLD.color:new(255,187,1,150),
+						[1] = EasyLD.color:new(255,187,0,0)})
+	self.PS2:setSizes({[0] = 24,
+						[0.3] = 23,
+						[1] = 8})
+	self.PS2:start()
 end
 
 function Hero:update(dt, entities, map)
@@ -88,6 +113,9 @@ function Hero:update(dt, entities, map)
 
 	if self.timeBeforeRunning > 0 then
 		self.timeBeforeRunning = self.timeBeforeRunning - dt
+		if self.timeBeforeRunning < 0 then
+			self.sfx.enter:play()
+		end
 		return
 	end
 
@@ -106,7 +134,7 @@ function Hero:update(dt, entities, map)
 		self.acceleration = vectorSword * ACCELERATION
 	end
 
-	self.swordSegment = EasyLD.segment:new(self.pos:copy(), self.pos + (vectorSword * self.distance), EasyLD.color:new(0,100,255))
+	self.swordSegment = EasyLD.segment:new(self.pos:copy(), self.pos + (vectorSword * self.distance), EasyLD.color:new(150,150,0))
 
 	if self.canAttack then
 		if self.swordSegment:collide(self.choice.collideArea) then
@@ -122,6 +150,11 @@ function Hero:update(dt, entities, map)
 	if map:collideHole(self.collideArea) then
 		self:takeDmg(5)
 	end
+
+	self.pAnim.angle = vectorSword:getAngle() + math.pi/2
+	self.PS2.follower:moveTo(self.pos.x + vectorSword.x * self.distance/4, self.pos.y + vectorSword.y * self.distance/4)
+	self.PS2:setDirection(math.pi * 2 - vectorSword:getAngle(), math.pi/36)
+	self.PS2:update(dt)
 end
 
 function Hero:findPath(map, goal)
@@ -204,6 +237,7 @@ function Hero:findBestDir(map, mapWeight)
 end
 
 function Hero:attack(entities, vectorSword)
+	self.PS2:emit(550)
 	for _,e in ipairs(entities) do
 		if e.id ~= self.id and self.swordSegment:collide(e.collideArea) then
 			if e.isPlayer then
@@ -220,6 +254,10 @@ function Hero:onDeath()
 	self:speak(self.randomStringOnDeath[math.random(1, #self.randomStringOnDeath)], 2.5)
 end
 
+function Hero:onDmg()
+	DM[#DM].sfx.hit:play()
+end
+
 function Hero:onCollide(entity)
 end
 
@@ -229,9 +267,9 @@ end
 
 function Hero:isPointOfInterestReached(map)
 	if self.choice ~= nil and self.choice.pos == self.pointOfInterest then
-		if not DM.follower.isHero then
-			self.depth = DM.follower.depth
-			DM:follow(self, 0.5)
+		if not DM[#DM].follower.isHero then
+			self.depth = DM[#DM].follower.depth
+			DM[#DM]:follow(self, 0.5)
 			local _,x,y = map:getTilePixel(self.pointOfInterest.x, self.pointOfInterest.y)
 			map:putTile(10, x, y)
 		end
@@ -247,8 +285,10 @@ end
 function Hero:drawUI()
 	local ratio = self.life/self.maxLife
 	local r = self.collideArea.forms[1].r
-	local lifeBox = EasyLD.box:new(self.pos.x - r * 2, self.pos.y - 3*r/2, r * 4 * ratio , 4, EasyLD.color:new(255,0,0))
+	local lifeBoxC = EasyLD.box:new(self.pos.x - r * 2-1, self.pos.y - 3*r/2-1, r * 4 * ratio+2 , 4+2, EasyLD.color:new(0,0,0))
+	local lifeBox = EasyLD.box:new(self.pos.x - r * 2, self.pos.y - 3*r/2, r * 4 * ratio , 4, EasyLD.color:new(200,0,0))
 	self.nameSize = font:sizeOf(self.name, 12)
+	lifeBoxC:draw()
 	lifeBox:draw()
 	font:printOutLine(self.name, 12, EasyLD.box:new(self.pos.x - self.nameSize /2, self.pos.y - 5*r/2, self.nameSize , 12), "center", nil, EasyLD.color:new(255,255,255,240), EasyLD.color:new(0, 0, 0, 240), 1)
 	if self.popup then
@@ -281,19 +321,21 @@ end
 
 function Hero:isLanding()
 	self.PS:emit(20)
+	self.sfx.isLanding:play()
 end
 
 function Hero:draw()
 	self.PS:draw()
 
-	if self.spriteAnimation ~= nil then
-		self.spriteAnimation:draw(self.pos)
+	if self.spriteAnimation ~= nil and false then
+		--self.spriteAnimation:draw(self.pos.x, self.pos.y)
 	else
-		self.collideArea:draw() --Comment this line for real, if test, uncomment
+		self.pAnim:draw() --Comment this line for real, if test, uncomment
 	end
 
 	if self.choice ~= nil then
-		self.swordSegment:draw()
+		--self.swordSegment:draw()
+		self.PS2:draw()
 	end
 
 	--font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))

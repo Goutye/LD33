@@ -13,7 +13,9 @@ local Treasure = require 'entities.Treasure'
 
 local Hero = require 'entities.Hero'
 
-function GameScreen:initialize(level, gamedata)
+function GameScreen:initialize(level, gamedata, isUpgrade)
+	self.isUpgrade = isUpgrade
+	--playlist:play()
 	self.newScreen = false
 	self.tl = EasyLD.tileset:new("assets/tilesets/dungeon.png", 32)
 
@@ -23,12 +25,11 @@ function GameScreen:initialize(level, gamedata)
 		self.heroesDefeated = {}
 	else
 		self.floors = gamedata.floors
-		for i = 1, #self.floors do
-			print("XX: "..self.floors[i])
-		end
 		self.money = gamedata.money
 		self.heroesDefeated = gamedata.heroesDefeated
 	end
+
+	self.timerNewScreen = false
 
 	self.nbFloors = #self.floors
 
@@ -44,7 +45,7 @@ function GameScreen:initialize(level, gamedata)
 	self.maps[2].name = "The foundry"
 	self.maps[3].name = "Pillars of Arraks"
 	self.maps[4].name = "The secret corridor"
-	self.maps[5].name = "The Ratking's\n laboratory"
+	self.maps[5].name = "The Ratking's laboratory"
 	self.maps[6].name = "Treasure Halls"
 
 	self.centerOn = {}
@@ -94,10 +95,10 @@ function GameScreen:initialize(level, gamedata)
 	self.slices[1]:addEntity(FireSlime:new(276, 376, EasyLD.area:new(EasyLD.circle:new(276, 376, 12, EasyLD.color:new(0,0,0,0)))))
 	self.slices[1]:addEntity(FireSlime:new(186, 376, EasyLD.area:new(EasyLD.circle:new(186, 376, 12, EasyLD.color:new(0,0,0,0)))))
 
-	--self.slices[2]:addEntity(PushSlime:new(128, 308, EasyLD.area:new(EasyLD.circle:new(128, 308, 12, EasyLD.color:new(0,0,0,0)))))
-	--self.slices[2]:addEntity(PushSlime:new(228, 168, EasyLD.area:new(EasyLD.circle:new(228, 168, 12, EasyLD.color:new(0,0,0,0)))))
-	--self.slices[2]:addEntity(PushSlime:new(228, 472, EasyLD.area:new(EasyLD.circle:new(228, 472, 12, EasyLD.color:new(0,0,0,0)))))
-	--self.slices[2]:addEntity(ExplodeSlime:new(228, 308, EasyLD.area:new(EasyLD.circle:new(228, 308, 12, EasyLD.color:new(0,0,0,0)))))
+	self.slices[2]:addEntity(PushSlime:new(128, 308, EasyLD.area:new(EasyLD.circle:new(128, 308, 12, EasyLD.color:new(0,0,0,0)))))
+	self.slices[2]:addEntity(PushSlime:new(228, 168, EasyLD.area:new(EasyLD.circle:new(228, 168, 12, EasyLD.color:new(0,0,0,0)))))
+	self.slices[2]:addEntity(PushSlime:new(228, 472, EasyLD.area:new(EasyLD.circle:new(228, 472, 12, EasyLD.color:new(0,0,0,0)))))
+	self.slices[2]:addEntity(ExplodeSlime:new(228, 308, EasyLD.area:new(EasyLD.circle:new(228, 308, 12, EasyLD.color:new(0,0,0,0)))))
 	
 
 	--self.slices[3]:addEntity(PushSlime:new(550, 370, EasyLD.area:new(EasyLD.circle:new(550, 370, 12, EasyLD.color:new(0,0,0,0)))))
@@ -117,10 +118,10 @@ function GameScreen:initialize(level, gamedata)
 	--self.slices[5]:addEntity(PushSlime:new(300, 660, EasyLD.area:new(EasyLD.circle:new(300, 660, 12, EasyLD.color:new(0,0,0,0)))))
 	--self.slices[5]:addEntity(PushSlime:new(706, 660, EasyLD.area:new(EasyLD.circle:new(706, 660, 12, EasyLD.color:new(0,0,0,0)))))
 
-	self.hero = Hero:new(220, 550, EasyLD.area:new(EasyLD.circle:new(220, 550, 12, EasyLD.color:new(0, 255, 0))))
+	self.hero = Hero:new(220, 550, EasyLD.area:new(EasyLD.circle:new(220, 550, 12, EasyLD.color:new(0, 255, 0, 0))))
 	self.hero:load(level or 0)
 	self.hero:addPointOfInterest(self.maps[1].pointOfInterest)
-	self.hero:speak(self.randomStrings[self.player.depth + 1][math.random(1, 2)], 3)
+	self.hero:speak(self.randomStrings[self.player.depth + 1][math.random(1, 2)], 5)
 	self.slices[1]:addEntity(self.hero)
 
 	self.isNewFloor = true
@@ -129,15 +130,30 @@ function GameScreen:initialize(level, gamedata)
 
 	self:prepareTreasure()
 
-	DM = EasyLD.depthManager:new(self.player, self.slices[1], 1, 0, math.min(self.nbFloors - 1, 2), 250)
 
-	DM:addDepth(1, 0.8, self.slices[2], 250)
+	table.insert(DM, EasyLD.depthManager:new(self.player, self.slices[1], 1, 0, math.min(self.nbFloors - 1, 2), 250))
+
+	DM[#DM]:addDepth(1, 0.8, self.slices[2], 250)
 	if self.nbFloors > 2 then
-		DM:addDepth(2, 0.66, self.slices[3], 250)
+		DM[#DM]:addDepth(2, 0.66, self.slices[3], 250)
 	end
-	DM:centerOn(self.centerOn[1][1], self.centerOn[1][2])
-	DM:follow(self.player, 0.5)
-	self.DM = DM
+	DM[#DM]:centerOn(self.centerOn[1][1], self.centerOn[1][2])
+	DM[#DM]:follow(self.player, 0.5)
+
+	DM[#DM].sfx = {}
+	DM[#DM].sfx.hit = EasyLD.sfx:new("assets/sfx/hit.wav", 0.2)
+	DM[#DM].sfx.death = EasyLD.sfx:new("assets/sfx/Death.wav", 0.2)
+	DM[#DM].sfx.money = EasyLD.sfx:new("assets/sfx/money.wav", 0.5)
+	DM[#DM].sfx.upgrade = EasyLD.sfx:new("assets/sfx/upgrade.wav", 0.8)
+	self.DM = DM[#DM]
+
+	if self.isUpgrade then
+		self.timeUpgrade = 2
+		self.upgradeAlpha = 200
+		self.isUpgardePile = true
+		self.timerUpPile = EasyLD.timer.after(2, function() self.timerUpPile = EasyLD.timer.every(0.15, function() self.isUpgardePile = not self.isUpgardePile
+			 end) end)
+	end
 end
 
 function GameScreen:preCalcul(dt)
@@ -163,10 +179,12 @@ function GameScreen:update(dt)
 	if self.idCurrent == #self.floors then
 		if self.hero:hasGotTreasure() then
 			self.timerEnd = EasyLD.timer.after(2, function()
+					playlist:stop()
 					EasyLD:nextScreen(EndScreen:new({floors = self.floors, money = self.money, heroesDefeated = self.heroesDefeated, lastHero = self.hero}), "cover", {0,1}, 3, true, "bounceout")
 				end)
 		end
 	elseif self.hero.isDead and not self.newScreen and not self.timerNewScreen then
+		print("DEAD")
 		self.timerNewScreen = EasyLD.timer.after(0.5, function()
 			self.newScreen = true
 			self.timerNewScreen = nil
@@ -175,12 +193,20 @@ function GameScreen:update(dt)
 			self.hero.money = math.floor((self.hero.level+1) * baseMoney + (math.random() * (self.hero.level + 1)) * baseMoney)
 			self.money = self.money + self.hero.money
 			local reduceMoney = 0
+
+			local isUpgrade = nil
 			if self.money >= baseMoney * (self.hero.level + 1) and #self.maps > #self.floors then
 				table.insert(self.floors, #self.floors + 1)
 				reduceMoney = baseMoney * (self.hero.level + 1) 
+				self.DM.sfx.upgrade:play()
+				isUpgrade = true
 			end
+			self.DM.sfx.money:play()
 			table.insert(self.heroesDefeated, self.hero)
-			EasyLD:nextScreen(GameScreen:new(self.hero.level + 1, {floors = self.floors, money = self.money - reduceMoney, heroesDefeated = self.heroesDefeated}), "fade", nil, 5, true, "quad")
+			playlist:stop()
+			self.timerNewScreen = true
+			--self:initialize(self.hero.level + 1, {floors = self.floors, money = self.money - reduceMoney, heroesDefeated = self.heroesDefeated}, isUpgrade)
+			EasyLD:nextScreen(GameScreen:new(self.hero.level + 1, {floors = self.floors, money = self.money - reduceMoney, heroesDefeated = self.heroesDefeated}, isUpgrade), "fade", nil, 5, true, "quad")
 		end	)
 	elseif self.hero:isPointOfInterestReached(self.maps[self.player.depth + 1]) then
 		self.slices[self.idCurrent]:removeEntity(self.hero)
@@ -202,7 +228,7 @@ function GameScreen:update(dt)
 					self.DM:moveUp()
 					self.player.depth = self.player.depth - 1
 					self.DM:addDepth(2, 0.66, self.slices[self.idCurrent + 2], 250)
-					--self.timer2 = EasyLD.flux.to(self.DM.depth[1], 1, {ratio = 0.66}):onupdate(function() self.DM.depth[1].alpha = 250 end)
+					self.timer2 = EasyLD.flux.to(self.DM.depth[1], 1, {ratio = 0.66}):onupdate(function() self.DM.depth[1].alpha = 250 end)
 				end
 			end)
 
@@ -236,27 +262,53 @@ function GameScreen:update(dt)
 			self.DM:follow(self.player, 0.5)
 		end
 	end
+
+	if self.isUpgrade then
+		self.timeUpgrade = self.timeUpgrade - dt
+		if self.timeUpgrade <= 0 then
+			if self.upgradeAlpha == 200 then
+				EasyLD.timer.cancel(self.timerUpPile)
+				self.timerupgrade = EasyLD.flux.to(self, 1, {upgradeAlpha = 0}):oncomplete(function()
+					self.isUpgrade = false
+					self.upgradeAlpha = 0
+				end	)
+				
+			end
+		end
+	end
 end
 
 function GameScreen:draw()
 	self.DM:draw()
 	--EasyLD.postfx:use("vignette", 0.6, 0.1, 0.1)
-	font:print("Floors: " .. self.nbFloors, 40, EasyLD.box:new(0,0,EasyLD.window.w, 50), nil, nil, EasyLD.color:new(255,255,255))
+	font:printOutLine("Floors: " .. self.nbFloors, 40, EasyLD.box:new(0,0,EasyLD.window.w, 50), nil, nil, EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0) , 1)
 	if self.nbFloors < #self.maps then
 		moneyText ="Money: " .. self.money .. "/" .. self.moneyRequired[self.nbFloors - 1]
 	else
 		moneyText ="Money: " .. self.money
 	end
-	font:print(moneyText, 40, EasyLD.box:new(0,40,EasyLD.window.w, 50), nil, nil, EasyLD.color:new(255,255,255))
-	font:print(self.maps[self.idCurrent].name, 60, EasyLD.box:new(0,0,EasyLD.window.w, 50), "center", nil, EasyLD.color:new(255,255,255))
-	font:print("Heros ",40, EasyLD.box:new(0,0,EasyLD.window.w, 50), "right", nil, EasyLD.color:new(255,255,255))
-	font:print("crushed",40, EasyLD.box:new(0,40,EasyLD.window.w, 50), "right", nil, EasyLD.color:new(255,255,255))
+	font:printOutLine(moneyText, 40, EasyLD.box:new(0,40,EasyLD.window.w, 50), nil, nil, EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0) , 1)
+	font:printOutLine(self.maps[self.idCurrent].name, 60, EasyLD.box:new(0,0,EasyLD.window.w, 50), "center", nil, EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0) , 1)
+	font:printOutLine("Heros ",40, EasyLD.box:new(0,0,EasyLD.window.w, 50), "right", nil, EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0) , 1)
+	font:printOutLine("crushed",40, EasyLD.box:new(0,40,EasyLD.window.w, 50), "right", nil, EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0) , 1)
 
-	font:print(self.hero.level.." :       ",40, EasyLD.box:new(0,16,EasyLD.window.w, 50), "right", nil, EasyLD.color:new(255,255,255))
+	font:printOutLine(self.hero.level.." :       ",40, EasyLD.box:new(0,16,EasyLD.window.w, 50), "right", nil, EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0) , 1)
+
+	if self.isUpgrade then
+		if self.isUpgardePile then
+			local h = EasyLD.window.h / 11
+			local b = EasyLD.box:new(0, h * 2, EasyLD.window.w, h, EasyLD.color:new(0,0,0, self.upgradeAlpha))
+			local b2 = EasyLD.box:new(0, h * 2+5, EasyLD.window.w, h - 10, EasyLD.color:new(50,50,50, self.upgradeAlpha))
+			b:draw()
+			b2:draw()
+			font:print("A new floor has been bought!", 66, b2, "center", "center", EasyLD.color:new(255,255,255, self.upgradeAlpha))
+		else
+
+		end
+	end
 end
 
 function GameScreen:onEnd()
-
 end
 
 return GameScreen

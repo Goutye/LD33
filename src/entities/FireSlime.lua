@@ -15,9 +15,9 @@ function FireSlime:load()
 	self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos:copy())
 
 	self.PS = EasyLD.particles:new(self.pos, "assets/smoke.png")
-	self.PS:setEmissionRate(100)
-	self.PS:setLifeTime(0.4)
-	self.PS:setInitialVelocity(200)
+	self.PS:setEmissionRate(200)
+	self.PS:setLifeTime(0.1)
+	self.PS:setInitialVelocity(900)
 	self.PS:setInitialAcceleration(0)
 	self.PS:setDuration(self.reloadTime)
 	self.PS:setDirection(0, math.pi/36)
@@ -32,6 +32,8 @@ function FireSlime:load()
 	self.pAnim = EasyLD.point:new(self.pos.x, self.pos.y, true)
 	self.collideArea:attach(self.pAnim)
 	self.pAnim:attachImg(self.spriteAnimation, "center")
+
+	self.sfx = EasyLD.sfx:new("assets/sfx/fire.wav", 0.4)
 end
 
 function FireSlime:update(dt, entities, map)
@@ -53,7 +55,7 @@ function FireSlime:update(dt, entities, map)
 			self.acceleration.y = self.acceleration.y + ACCELERATION
 		end
 
-		self.vectorFire = EasyLD.vector:of(self.pos, DM:getMousePos())
+		self.vectorFire = EasyLD.vector:of(self.pos, DM[#DM]:getMousePos())
 		self.vectorFire:normalize()
 		self.PS:setDirection(math.pi * 2 - self.vectorFire:getAngle(), math.pi/36)
 		self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos + (self.vectorFire * self.power), EasyLD.color:new(255,0,0))
@@ -101,6 +103,7 @@ end
 
 function FireSlime:fire(entities)
 	self.PS:start()
+	self.sfx:play()
 	self.timerPS = EasyLD.timer.after(0.5, function() self.PS:stop() end)
 	for _,e in ipairs(entities) do
 		if e.id ~= self.id and self.fireSegment:collide(e.collideArea) then
@@ -112,10 +115,11 @@ function FireSlime:fire(entities)
 end
 
 function FireSlime:onDeath()
-
+	DM[#DM].sfx.death:play()
 end
 
 function FireSlime:onDmg()
+	DM[#DM].sfx.hit:play()
 	if self.isPlayer then
 		EasyLD.camera:tilt(EasyLD.vector:new(math.random()-0.5,math.random()-0.5), 10, 0.5)
 	end
@@ -130,7 +134,9 @@ end
 function FireSlime:drawUI()
 	local ratio = self.life/self.maxLife
 	local r = self.collideArea.forms[1].r
-	local lifeBox = EasyLD.box:new(self.pos.x - r, self.pos.y - 3*r/2, r * 2 * ratio , 2, EasyLD.color:new(255,0,0))
+	local lifeBoxC = EasyLD.box:new(self.pos.x - r -1, self.pos.y - 3*r/2 - 1, r * 2 * ratio + 2 , 2+2, EasyLD.color:new(0,0,0))
+	local lifeBox = EasyLD.box:new(self.pos.x - r, self.pos.y - 3*r/2, r * 2 * ratio , 2, EasyLD.color:new(200,00,0))
+	lifeBoxC:draw()
 	lifeBox:draw()
 end
 

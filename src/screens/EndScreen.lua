@@ -5,13 +5,13 @@ local EndScreen = class('EndScreen', IScreen)
 
 function EndScreen:initialize(gamedata)
 	self.floors = gamedata.floors
-	self.maps = {}
-	self.maps[1] = "The entrance"
-	self.maps[2] = "The foundry"
-	self.maps[3] = "Pillars of Arraks"
-	self.maps[4] = "The secret corridor"
-	self.maps[5] = "The Ratking's\n laboratory"
-	self.maps[6] = "Treasure Halls"
+	self.mapsName = {}
+	self.mapsName[1] = "The entrance"
+	self.mapsName[2] = "The foundry"
+	self.mapsName[3] = "Pillars of Arraks"
+	self.mapsName[4] = "The secret corridor"
+	self.mapsName[5] = "The Ratking's\n laboratory"
+	self.mapsName[6] = "Treasure Halls"
 	self.heroesDefeated = gamedata.heroesDefeated
 	self.money = gamedata.money
 	self.lastHero = gamedata.lastHero
@@ -26,10 +26,10 @@ function EndScreen:initialize(gamedata)
 	self.strFloors = ""
 	for i = 1, #self.floors do
 		if i == #self.floors then
-			self.strFloors = self.strFloors .. self.maps[6] .."\n"
+			self.strFloors = self.strFloors .. self.mapsName[6] .."\n"
 			break
 		end
-		self.strFloors = self.strFloors .. self.maps[i] .."\n"
+		self.strFloors = self.strFloors .. self.mapsName[i] .."\n"
 	end
 
 	self.boxThank = EasyLD.box:new(0, 500, EasyLD.window.w, 100)
@@ -39,6 +39,7 @@ function EndScreen:initialize(gamedata)
 	self.timer = EasyLD.flux.to(self.area, 2, {angle = math.pi/12}):oncomplete(function()
 			self:next(-self.area.angle)
 		end):ease("backout")
+	music.gg:play()
 end
 
 function EndScreen:next(angle)
@@ -57,6 +58,9 @@ end
 
 function EndScreen:draw()
 	self.box:draw("fill")
+
+	--self.maps[1]:draw(0, 0, 5, 5, 0, 0)
+
 	font:print("You've been defeated by...", 64, EasyLD.box:new(0,0,EasyLD.window.w, EasyLD.window.h), "center", nil, EasyLD.color:new(255,255,255))
 	font:print(self.lastHero.name, 100, EasyLD.box:new(0,64, EasyLD.window.w, 100), "center", nil, EasyLD.color:new(255,255,255))
 	
@@ -77,7 +81,7 @@ function EndScreen:draw()
 end
 
 function EndScreen:onEnd()
-
+	music.gg:pause()
 end
 
 return EndScreen

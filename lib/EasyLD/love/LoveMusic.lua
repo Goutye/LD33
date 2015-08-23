@@ -2,7 +2,7 @@ local class = require 'EasyLD.lib.middleclass'
 
 local Music = class('Music')
 
-function Music:initialize(name, type)
+function Music:initialize(name, type, looping)
 	if type == "static" then
 		self.mData = love.sound.newSoundData(name)
 		self.m = love.audio.newSource(self.mData)
@@ -12,7 +12,7 @@ function Music:initialize(name, type)
 		self.static = false
 	end
 	self.timer = nil
-	self.looping = false
+	self.looping = looping or false
 	self.name = name
 end
 

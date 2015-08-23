@@ -32,6 +32,13 @@ function PushSlime:load()
 	self.collideArea:attach(self.pAnim)
 	self.pAnim:attachImg(self.spriteAnimation, "center")
 	self.vectorPush = EasyLD.vector:of(self.pos, self.pos)
+
+	self.sfx = {}
+	self.sfx.push = EasyLD.sfx:new("assets/sfx/push.wav", 0.4, nil, function()
+								if self.isPushing and self.life > 0 then
+									self.sfx.push:play()
+								end
+							end)
 end
 
 function PushSlime:update(dt, entities, map)
@@ -53,7 +60,7 @@ function PushSlime:update(dt, entities, map)
 			self.acceleration.y = self.acceleration.y + ACCELERATION
 		end
 
-		self.vectorPush = EasyLD.vector:of(self.pos, DM:getMousePos())
+		self.vectorPush = EasyLD.vector:of(self.pos, DM[#DM]:getMousePos())
 		self.vectorPush:normalize()
 		self.vectorPush = self.vectorPush * self.distance
 		local vectorNormal = self.vectorPush:normal() * .5
@@ -125,6 +132,7 @@ function PushSlime:push(entities)
 	if not self.isPushing then
 		self.PS:start()
 		self.isPushing = true
+		self.sfx.push:play()
 	end
 	for _,e in ipairs(entities) do
 		if e.id ~= self.id and self.pushPolygon:collide(e.collideArea) then
@@ -136,7 +144,7 @@ function PushSlime:push(entities)
 end
 
 function PushSlime:onDeath()
-
+	DM[#DM].sfx.death:play()
 end
 
 function PushSlime:onCollide(entity)
@@ -147,6 +155,7 @@ end
 
 function PushSlime:onDmg()
 	if self.isPlayer then
+		DM[#DM].sfx.hit:play()
 		EasyLD.camera:tilt(EasyLD.vector:new(math.random()-0.5,math.random()-0.5), 10, 0.5)
 	end
 end
@@ -154,7 +163,9 @@ end
 function PushSlime:drawUI()
 	local ratio = self.life/self.maxLife
 	local r = self.collideArea.forms[1].r
-	local lifeBox = EasyLD.box:new(self.pos.x - r, self.pos.y - 3*r/2, r * 2 * ratio , 2, EasyLD.color:new(255,0,0))
+	local lifeBoxC = EasyLD.box:new(self.pos.x - r -1, self.pos.y - 3*r/2 - 1, r * 2 * ratio + 2 , 2+2, EasyLD.color:new(0,0,0))
+	local lifeBox = EasyLD.box:new(self.pos.x - r, self.pos.y - 3*r/2, r * 2 * ratio , 2, EasyLD.color:new(200,00,0))
+	lifeBoxC:draw()
 	lifeBox:draw()
 end
 

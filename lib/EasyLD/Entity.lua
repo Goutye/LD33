@@ -6,7 +6,8 @@ local MAX_SPEED = 500
 local SQUARED_MAX_SPEED = MAX_SPEED * MAX_SPEED
 local FRICTION = 0.95
 
-function Entity:initialize(x, y, collideArea, spriteAnimation)
+function Entity:initialize(x, y, collideArea, spriteAnimation, DM)
+	self.DM = DM
 	self.pos = EasyLD.point:new(x, y)
 	self.speed = EasyLD.vector:new(0, 0)
 	self.acceleration = EasyLD.vector:new(0, 0)
@@ -133,12 +134,12 @@ function Entity:takeDmg(dmg)
 		self.invincible = true
 		self.timerInvincible = EasyLD.timer.after(self.timeBeforeNextDmg, function() self.timerInvincible, self.invincible = nil, false end)
 		self.life = self.life - dmg
+		self:onDmg()
 		if self.life <= 0 then
 			self.isDead = true
 			self.life = 0
 			return true
 		end
-		self:onDmg()
 	end
 end
 

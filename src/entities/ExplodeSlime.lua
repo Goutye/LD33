@@ -31,6 +31,10 @@ function ExplodeSlime:load()
 	self.pAnim = EasyLD.point:new(self.pos.x, self.pos.y, true)
 	self.collideArea:attach(self.pAnim)
 	self.pAnim:attachImg(self.spriteAnimation, "center")
+
+
+	self.sfx = {}
+	self.sfx.explode = EasyLD.sfx:new("assets/sfx/boom.wav", 0.4)
 end
 
 function ExplodeSlime:update(dt, entities, map)
@@ -86,19 +90,23 @@ function ExplodeSlime:update(dt, entities, map)
 end
 
 function ExplodeSlime:explode(entities)
-	self.PS:start()
-	EasyLD.camera:shake({x = 25, y = 25}, 1, "sineout")
-	for _,e in ipairs(entities) do
-		if e.id ~= self.id and self.explodeCircle:collide(e.collideArea) then
-			local dir = EasyLD.vector:of(self.pos, e.pos)
-			local distance = dir:length()
-			dir:normalize() 
-			local ratio = 1 - distance / self.power
-			e:takeDmg(ratio * self.dmg)
-			e.speed = e.speed + (dir * ratio * self.power * 6)
+	if not self.isExploded then
+		self.isExploded = true
+		self.PS:start()
+		self.sfx.explode:play()
+		EasyLD.camera:shake({x = 25, y = 25}, 1, "sineout")
+		for _,e in ipairs(entities) do
+			if e.id ~= self.id and self.explodeCircle:collide(e.collideArea) then
+				local dir = EasyLD.vector:of(self.pos, e.pos)
+				local distance = dir:length()
+				dir:normalize() 
+				local ratio = 1 - distance / self.power
+				e:takeDmg(ratio * self.dmg)
+				e.speed = e.speed + (dir * ratio * self.power * 6)
+			end
 		end
+		self.timerDeath = EasyLD.timer.after(1, function() self.isDead = true end)
 	end
-	self.timerDeath = EasyLD.timer.after(1, function() self.isDead = true end)
 end
 
 function ExplodeSlime:onDeath()
@@ -113,9 +121,11 @@ function ExplodeSlime:onDmg()
 	if self.isPlayer then
 		EasyLD.camera:tilt(EasyLD.vector:new(math.random()-0.5,math.random()-0.5), 10, 0.5)
 	end
+
+
 end
 
-function Entity:takeDmg(dmg)
+function ExplodeSlime:takeDmg(dmg)
 	self.toExplode = true
 	if not self.invincible then
 		self.invincible = true

@@ -19,6 +19,10 @@ end
 
 function Treasure:onCollide(entity)
 	entity.gotTreasure = true
+	--if self.timer == nil then
+		DM[#DM].sfx.money:play()
+		--self.timer = EasyLD.timer.after(0.3, function() self.timer = nil end)
+	--end
 end
 
 function Treasure:draw()
