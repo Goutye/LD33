@@ -104,7 +104,7 @@ end
 function FireSlime:fire(entities)
 	self.PS:start()
 	self.sfx:play()
-	self.timerPS = EasyLD.tet quimer.after(0.5, function() self.PS:stop() end)
+	self.timerPS = EasyLD.timer.after(0.5, function() self.PS:stop() end)
 	for _,e in ipairs(entities) do
 		if e.id ~= self.id and self.fireSegment:collide(e.collideArea) then
 			e:takeDmg(self.dmg)
