@@ -166,6 +166,9 @@ function Map:draw(x, y, nbTilesX, nbTilesY, beginX, beginY)
 		for _,box in ipairs(self.collideBoxes) do
 			box:translate(x - self.offset.x, y - self.offset.y)
 		end
+		for _,box in ipairs(self.holeBoxes) do
+			box:translate(x - self.offset.x, y - self.offset.y)
+		end
 		self.offset.x = x
 		self.offset.y = y
 	end

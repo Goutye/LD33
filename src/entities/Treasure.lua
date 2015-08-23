@@ -13,12 +13,12 @@ function Treasure:onDeath()
 
 end
 
-function Treasure:takeDmg()
-
+function Treasure:takeDmg(dmg)
+	
 end
 
 function Treasure:onCollide(entity)
-	entity.gotTresure = true
+	entity.gotTreasure = true
 end
 
 function Treasure:draw()

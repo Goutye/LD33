@@ -138,7 +138,12 @@ function Entity:takeDmg(dmg)
 			self.life = 0
 			return true
 		end
+		self:onDmg()
 	end
+end
+
+function Entity:onDmg()
+
 end
 
 function Entity:onDeath()

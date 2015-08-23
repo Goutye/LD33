@@ -79,6 +79,12 @@ function DepthManager:update(dt)
 	end
 end
 
+function DepthManager:moveUp()
+	for id = -self.nbBefore, self.nbAfter - 1 do
+		self.depth[id] = self.depth[id+1]
+	end
+end
+
 function DepthManager:setAlpha(depth, alpha)
 	self.depth[depth].alpha = alpha
 end

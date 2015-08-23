@@ -3,14 +3,21 @@ local Entity = require 'EasyLD.Entity'
 
 local Hero = class('Hero', Entity)
 
+Hero.firstname = {"Tirion", "John", "Sirius", "Sylvanas", "Jaime", "Mike", "Umaru", "Harry", "Hermione", "Ginny", "Haruihi", "Lelouch", "Moon", ""}
+Hero.lastname = {"Fordring", "Snow", "Black", "Windrunner", "Lannister", "Kazprzak", "chan", "Potter", "Granger", "Weasley", "Suzumiya", "Lamperouge", "Moon"}
+
 function Hero:load(level)
+	math.randomseed( os.time() )
 	if level == nil then level = 0 end
+	self.firstname = "Moon"--Hero.firstname[math.random(1, #Hero.firstname)]
+	self.lastname = "Moon"--Hero.lastname[math.random(1, #Hero.lastname)]
+	self.name = self.firstname .. " " .. self.lastname
 	self.isHero = true
 	self.level = level
 	self.distance = 50
 	self.dmg = 5 + level * 2
-	self.life = 20 + level * 10
-	self.maxLife = 20 + level * 10
+	self.life = 100 + level * 10
+	self.maxLife = 100 + level * 10
 	self.choice = nil
 	self.canAttack = true
 	self.reloadTime = 0.5 - level *0.01
@@ -46,18 +53,27 @@ function Hero:load(level)
 end
 
 function Hero:update(dt, entities, map)
-	local ACCELERATION = 500
+	local ACCELERATION = 1000
 
 	self.acceleration = EasyLD.point:new(0, 0)
 
 	if self.choice == nil or self.choice.isDead then
 		self.choice = nil
 
+		bestChoice = nil
+		bestDist = 999999999
 		for _,e in ipairs(entities) do
 			if e.id ~= self.id and not e.isDead then
-				self.choice = e
+				local v = EasyLD.vector:of(e.pos, self.pos)
+				local d = v:squaredLength()
+				if d < bestDist then
+					bestDist = d
+					bestChoice = e
+				end
 			end
 		end
+
+		self.choice = bestChoice
 
 		if self.choice == nil then
 			self.choice = {pos = self.pointOfInterest}
@@ -67,15 +83,23 @@ function Hero:update(dt, entities, map)
 		end
 	end
 
+	self.PS.follower:moveTo(self.pos.x, self.pos.y )--+ map.tileset.tileSizeY/2)
+	self.PS:update(dt)
+
 	if self.timeBeforeRunning > 0 then
 		self.timeBeforeRunning = self.timeBeforeRunning - dt
 		return
 	end
 
-	local direction = self:findPath(map, self.choice.pos)
+	if self.timerPathDir == nil then
+		self.pathMap = self:findPath(map, self.choice.pos)
+		self.timerPathDir = EasyLD.timer.after(0.5, function() self.timerPathDir = nil end)
+	end
+	local direction = self:findBestDir(map, self.pathMap)
 	self.acceleration = direction * ACCELERATION
 
 	local vectorSword = EasyLD.vector:of(self.pos, self.choice.pos)
+	local dist = vectorSword:squaredLength()
 	vectorSword:normalize()
 
 	if self.acceleration:squaredLength() == 0 then
@@ -86,7 +110,7 @@ function Hero:update(dt, entities, map)
 
 	if self.canAttack then
 		if self.swordSegment:collide(self.choice.collideArea) then
-			self:attack(entities)
+			self:attack(entities, vectorSword)
 			self.canAttack = false
 			self.timer = EasyLD.timer.after(self.reloadTime, function() self.timer, self.canAttack, self.swordSegment.c = nil, true, EasyLD.color:new(0,100,255) end)
 			self.swordSegment.c = EasyLD.color:new(0,255,100)
@@ -98,12 +122,10 @@ function Hero:update(dt, entities, map)
 	if map:collideHole(self.collideArea) then
 		self:takeDmg(5)
 	end
-
-	self.PS.follower:moveTo(self.pos.x, self.pos.y)
-	self.PS:update(dt)
 end
 
 function Hero:findPath(map, goal)
+	local tl, tlY = map.tileset.tileSize, map.tileset.tileSizeY
 	local mapWeight = {}
 	for i = 0, map.w - 1 do
 		mapWeight[i] = {}
@@ -121,12 +143,19 @@ function Hero:findPath(map, goal)
 		local pos = nextPos[1]
 		table.remove(nextPos, 1)
 
-		if pos.x > 0 and pos.x < map.w and pos.y > 0 and pos.y < map.h and map:getInfos(pos.x, pos.y) == 0 and pos.w < mapWeight[pos.x][pos.y] then
+		if pos.x > 0 and pos.x < map.w and pos.y > 0 and pos.y < map.h and pos.w < mapWeight[pos.x][pos.y] and map:getInfos(pos.x, pos.y) ~= 1 then
+			local w = pos.w
+			if map:getInfos(pos.x, pos.y) == 0 then
+				w = w + 1
+			elseif map:getInfos(pos.x, pos.y) == 2 then
+				w = w + 5
+			end
+
 			mapWeight[pos.x][pos.y] = pos.w
-			table.insert(nextPos, {x = pos.x + 1, y = pos.y, w = pos.w + 1})
-			table.insert(nextPos, {x = pos.x - 1, y = pos.y, w = pos.w + 1})
-			table.insert(nextPos, {x = pos.x, y = pos.y + 1, w = pos.w + 1})
-			table.insert(nextPos, {x = pos.x, y = pos.y - 1, w = pos.w + 1})
+			table.insert(nextPos, {x = pos.x + 1, y = pos.y, w = w})
+			table.insert(nextPos, {x = pos.x - 1, y = pos.y, w = w})
+			table.insert(nextPos, {x = pos.x, y = pos.y + 1, w = w})
+			table.insert(nextPos, {x = pos.x, y = pos.y - 1, w = w})
 		end
 	end
 
@@ -138,12 +167,19 @@ function Hero:findPath(map, goal)
 	-- 	print (str)
 	-- end
 
+
+	--print(dir.x, dir.y)
+	return mapWeight
+end
+
+function Hero:findBestDir(map, mapWeight)
+	local tl, tlY = map.tileset.tileSize, map.tileset.tileSizeY
 	local _,x,y = map:getTilePixel(self.pos.x, self.pos.y)
 	local bestx, besty = 0, 0
 	local best = 9999
-	for i = x - 2, x + 2 do
+	for i = x - 1, x + 1 do
 		if i >= 0 and i < map.w then
-			for j = y - 2, y + 2 do
+			for j = y - 1, y + 1 do
 				if j >= 0 and j < map.h then
 					local w = mapWeight[i][j]
 					if w ~= nil and w < best then
@@ -159,17 +195,20 @@ function Hero:findPath(map, goal)
 
 	--print(self.pos.x, self.pos.y, x, y, goalx, goaly, goal.x, goal.y)
 
-	local dir = EasyLD.vector:of(EasyLD.point:new(x, y), EasyLD.point:new(bestx, besty))
+	local dir = EasyLD.vector:of(EasyLD.point:new(self.pos.x, self.pos.y), EasyLD.point:new(bestx * map.tileset.tileSize + tl/2 + map.offset.x, besty * map.tileset.tileSizeY+ tlY/2 + map.offset.y))
 	if dir:squaredLength() ~= 0 then
 		dir:normalize()
 	end
-	--print(dir.x, dir.y)
+
 	return dir
 end
 
-function Hero:attack(entities)
+function Hero:attack(entities, vectorSword)
 	for _,e in ipairs(entities) do
 		if e.id ~= self.id and self.swordSegment:collide(e.collideArea) then
+			if e.isPlayer then
+				EasyLD.camera:tilt(vectorSword, 20, 0.5)
+			end
 			if e:takeDmg(self.dmg) then
 				self:speak(self.randomStringOnKill[math.random(1,#self.randomStringOnKill)], 1.5)
 			end
@@ -189,7 +228,7 @@ function Hero:addPointOfInterest(pointOfInterest)
 end
 
 function Hero:isPointOfInterestReached(map)
-	if self.choice.pos == self.pointOfInterest then
+	if self.choice ~= nil and self.choice.pos == self.pointOfInterest then
 		if not DM.follower.isHero then
 			self.depth = DM.follower.depth
 			DM:follow(self, 0.5)
@@ -197,19 +236,21 @@ function Hero:isPointOfInterestReached(map)
 			map:putTile(10, x, y)
 		end
 		local dist = EasyLD.vector:of(self.pointOfInterest, self.pos)
-		return dist:squaredLength() < 25
+		return dist:squaredLength() < 172
 	end
 end
 
 function Hero:hasGotTreasure()
-	return self.gotTresure
+	return self.gotTreasure
 end
 
 function Hero:drawUI()
 	local ratio = self.life/self.maxLife
 	local r = self.collideArea.forms[1].r
 	local lifeBox = EasyLD.box:new(self.pos.x - r * 2, self.pos.y - 3*r/2, r * 4 * ratio , 4, EasyLD.color:new(255,0,0))
+	self.nameSize = font:sizeOf(self.name, 12)
 	lifeBox:draw()
+	font:printOutLine(self.name, 12, EasyLD.box:new(self.pos.x - self.nameSize /2, self.pos.y - 5*r/2, self.nameSize , 12), "center", nil, EasyLD.color:new(255,255,255,240), EasyLD.color:new(0, 0, 0, 240), 1)
 	if self.popup then
 		self.popup()
 	end
@@ -223,13 +264,14 @@ function Hero:speak(text, time)
 		local x, y = self.pos.x, self.pos.y
 		local size = font:sizeOf(text, 20)
 		local list = {}
-		table.insert(list, EasyLD.point:new(x, y - 16))
-		table.insert(list, EasyLD.point:new(x, y - 36))
-		table.insert(list, EasyLD.point:new(x + 0.4 * size, y - 36))
-		table.insert(list, EasyLD.point:new(x + 0.4 * size, y - 76))
-		table.insert(list, EasyLD.point:new(x - 0.72 * size, y - 76))
-		table.insert(list, EasyLD.point:new(x - 0.72 * size, y - 36))
 		table.insert(list, EasyLD.point:new(x - 0.05 * size, y - 36))
+		table.insert(list, EasyLD.point:new(x - 0.72 * size, y - 36))
+		table.insert(list, EasyLD.point:new(x - 0.72 * size, y - 76))
+		table.insert(list, EasyLD.point:new(x + 0.4 * size, y - 76))
+		table.insert(list, EasyLD.point:new(x + 0.4 * size, y - 36))
+		table.insert(list, EasyLD.point:new(x, y - 36))
+		table.insert(list, EasyLD.point:new(x, y - 16))
+		
 		local polygon = EasyLD.polygon:new("fill", EasyLD.color:new(20, 20, 20, 240), unpack(list))
 		polygon:draw()
 		font:print(text, 20, EasyLD.box:new(x - 0.72 * size, y - 71, 1.12 * size, 20), "center", nil, EasyLD.color:new(255,255,255))

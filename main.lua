@@ -16,7 +16,12 @@ function EasyLD:load()
 end
 
 function EasyLD:preCalcul(dt)
-	return dt
+	local fps = EasyLD:getFPS()
+	if fps ~= 0 then
+		return 1/120
+	else
+		return dt
+	end
 end
 
 function EasyLD:update(dt)

@@ -26,6 +26,12 @@ function PushSlime:load()
 						[1] = EasyLD.color:new(255,255,255,0)})
 	self.PS:setSizes({[0] = 16,
 						[1] = 48})
+	self.spriteAnimation = EasyLD.spriteAnimation(self, "assets/sprites/PushSlime.png", 3, 0.5, 32, 32, 0, -1, "center")
+	self.spriteAnimation:play()
+	self.pAnim = EasyLD.point:new(self.pos.x, self.pos.y, true)
+	self.collideArea:attach(self.pAnim)
+	self.pAnim:attachImg(self.spriteAnimation, "center")
+	self.vectorPush = EasyLD.vector:of(self.pos, self.pos)
 end
 
 function PushSlime:update(dt, entities, map)
@@ -47,14 +53,14 @@ function PushSlime:update(dt, entities, map)
 			self.acceleration.y = self.acceleration.y + ACCELERATION
 		end
 
-		local vectorPush = EasyLD.vector:of(self.pos, DM:getMousePos())
-		vectorPush:normalize()
-		vectorPush = vectorPush * self.distance
-		local vectorNormal = vectorPush:normal() * .5
-		local p1 = self.pos + vectorPush
+		self.vectorPush = EasyLD.vector:of(self.pos, DM:getMousePos())
+		self.vectorPush:normalize()
+		self.vectorPush = self.vectorPush * self.distance
+		local vectorNormal = self.vectorPush:normal() * .5
+		local p1 = self.pos + self.vectorPush
 		local p2 = p1:copy()
 		p1, p2 = p1 - vectorNormal, p2 + vectorNormal
-		self.PS:setDirection(math.pi * 2 - vectorPush:getAngle(), math.pi/2)
+		self.PS:setDirection(math.pi * 2 - self.vectorPush:getAngle(), math.pi/2)
 		self.pushPolygon = EasyLD.polygon:new("fill", EasyLD.color:new(255,0,0,200), p1, p2, self.pos:copy())
 		
 		if EasyLD.mouse:isDown("l") and self.timePush > 0 then
@@ -81,14 +87,14 @@ function PushSlime:update(dt, entities, map)
 			end
 
 			if self.hero ~= nil then
-				local vectorPush = EasyLD.vector:of(self.pos, self.hero.pos)
-				vectorPush:normalize()
-				vectorPush = vectorPush * self.distance
-				local vectorNormal = vectorPush:normal() * .5
-				local p1 = self.pos + vectorPush
+				self.vectorPush = EasyLD.vector:of(self.pos, self.hero.pos)
+				self.vectorPush:normalize()
+				self.vectorPush = self.vectorPush * self.distance
+				local vectorNormal = self.vectorPush:normal() * .5
+				local p1 = self.pos + self.vectorPush
 				local p2 = p1:copy()
 				p1, p2 = p1 - vectorNormal, p2 + vectorNormal
-				self.PS:setDirection(math.pi * 2 - vectorPush:getAngle(), math.pi/2)
+				self.PS:setDirection(math.pi * 2 - self.vectorPush:getAngle(), math.pi/2)
 				self.pushPolygon = EasyLD.polygon:new("fill", EasyLD.color:new(255,0,0,200), p1, p2, self.pos:copy())
 			end
 
@@ -110,6 +116,7 @@ function PushSlime:update(dt, entities, map)
 		self:takeDmg(5)
 	end
 
+	self.pAnim.angle = self.vectorPush:getAngle() + math.pi/2
 	self.PS.follower:moveTo(self.pos:get())
 	self.PS:update(dt)
 end
@@ -133,7 +140,15 @@ function PushSlime:onDeath()
 end
 
 function PushSlime:onCollide(entity)
+	local v = EasyLD.vector:of(entity.pos, self.pos)
+	v:normalize()
+	self.speed = self.speed + entity.speed:length() * v
+end
 
+function PushSlime:onDmg()
+	if self.isPlayer then
+		EasyLD.camera:tilt(EasyLD.vector:new(math.random()-0.5,math.random()-0.5), 10, 0.5)
+	end
 end
 
 function PushSlime:drawUI()
@@ -145,17 +160,10 @@ end
 
 function PushSlime:draw()
 	self.PS:draw()
-	if self.spriteAnimation ~= nil then
+	if self.spriteAnimation ~= nil and false then
 		self.spriteAnimation:draw(self.pos)
 	else
 		self.collideArea:draw() --Comment this line for real, if test, uncomment
-	end
-
-	if self.timePush > 0 then
-		self.collideArea.forms[1].c = EasyLD.color:new(255,255,255)
-		--self.pushPolygon:draw()
-	else
-		self.collideArea.forms[1].c = EasyLD.color:new(200,200,200)
 	end
 
 	--font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))

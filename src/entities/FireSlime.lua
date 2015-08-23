@@ -5,7 +5,7 @@ local FireSlime = class('FireSlime', Entity)
 
 function FireSlime:load()
 	self.isPlayer = false
-	self.power = 100
+	self.power = 140
 	self.dmg = 5
 	self.life = 10
 	self.maxLife = 10
@@ -27,6 +27,11 @@ function FireSlime:load()
 	self.PS:setSizes({[0] = 16,
 						[0.2] = 18,
 						[1] = 16})
+	self.spriteAnimation = EasyLD.spriteAnimation(self, "assets/sprites/FireSlime.png", 3, 0.5, 32, 32, 0, -1, "center")
+	self.spriteAnimation:play()
+	self.pAnim = EasyLD.point:new(self.pos.x, self.pos.y, true)
+	self.collideArea:attach(self.pAnim)
+	self.pAnim:attachImg(self.spriteAnimation, "center")
 end
 
 function FireSlime:update(dt, entities, map)
@@ -80,12 +85,16 @@ function FireSlime:update(dt, entities, map)
 			self.timerAttack = EasyLD.timer.after(self.reloadTime, function() self.timerAttack, self.canAttack = nil, true end)
 			self:fire(entities)
 		end
+	else 
+		self.vectorFire = EasyLD.vector:of(self.pos, self.hero.pos)
+		self.vectorFire:normalize()
 	end
 
 	if map:collideHole(self.collideArea) then
 		self:takeDmg(5)
 	end
 
+	self.pAnim.angle = self.vectorFire:getAngle() + math.pi/2
 	self.PS.follower:moveTo(self.pos:get())
 	self.PS:update(dt)
 end
@@ -106,8 +115,16 @@ function FireSlime:onDeath()
 
 end
 
-function FireSlime:onCollide(entity)
+function FireSlime:onDmg()
+	if self.isPlayer then
+		EasyLD.camera:tilt(EasyLD.vector:new(math.random()-0.5,math.random()-0.5), 10, 0.5)
+	end
+end
 
+function FireSlime:onCollide(entity)
+	local v = EasyLD.vector:of(entity.pos, self.pos)
+	v:normalize()
+	self.speed = self.speed + entity.speed:length() * v
 end
 
 function FireSlime:drawUI()
@@ -119,20 +136,14 @@ end
 
 function FireSlime:draw()
 	self.PS:draw()
-	if self.spriteAnimation ~= nil then
-		self.spriteAnimation:draw(self.pos)
+	if self.spriteAnimation ~= nil and false then
+		self.spriteAnimation:draw(self.pos.x, self.pos.y, 0)
 	else
 		self.collideArea:draw() --Comment this line for real, if test, uncomment
 	end
 
 	if self.isPlayer then
 		--self.fireSegment:draw()
-	end
-
-	if self.canAttack then
-		self.collideArea.forms[1].c = EasyLD.color:new(255,200,200)
-	else
-		self.collideArea.forms[1].c = EasyLD.color:new(255,255,255)
 	end
 
 	--font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))
