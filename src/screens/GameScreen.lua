@@ -186,7 +186,7 @@ function GameScreen:update(dt)
 					EasyLD:nextScreen(EndScreen:new({floors = self.floors, money = self.money, heroesDefeated = self.heroesDefeated, lastHero = self.hero}), "cover", {0,1}, 3, true, "bounceout")
 				end)
 		end
-	elseif self.hero.isDead and not self.newScreen and not self.timerNewScreen then
+	elseif self.hero.isDeadReally and not self.newScreen and not self.timerNewScreen then
 		self.newScreen = true
 		self.timerNewScreen = nil
 

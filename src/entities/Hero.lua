@@ -42,19 +42,26 @@ function Hero:load(level)
 	self.timeBeforeRunning = 1
 
 	self.randomStringOnKill = {"One more for the light!",
-								"Eats this, heinous monster!",
+								"Eat this, heinous monster!",
 								"You will never be able to reign here!",
 								"Is this all you got?",
 								"Bless the sun!",
 								"Umaru-chan, please notice me!",
 								"By the divine hammer!",
 								"Anduin will claim your soul!"}
-	self.randomStringOnDeath = {"Arrrrrggggggggh. The light... The light should have come back...",
+	self.randomStringOnDeath = {"Arrrrrggggggggh. The light... The light should have been coming back...",
 								".. I can only see black... darkness every...where..."}
 
 	self.sfx = {}
 	self.sfx.enter = EasyLD.sfx:new("assets/sfx/enter.wav", 0.7)
 	self.sfx.isLanding = EasyLD.sfx:new("assets/sfx/isLanding.wav", 0.8)
+
+	self.sfx.death = {}
+	table.insert(self.sfx.death, EasyLD.sfx:new("assets/sfx/umaru.wav", 0.7))
+	table.insert(self.sfx.death, EasyLD.sfx:new("assets/sfx/comingBack.wav", 0.7))
+	table.insert(self.sfx.death, EasyLD.sfx:new("assets/sfx/darkness.wav", 0.7))
+	table.insert(self.sfx.death, EasyLD.sfx:new("assets/sfx/olley.wav", 0.7))
+	table.insert(self.sfx.death, EasyLD.sfx:new("assets/sfx/avenge.wav", 0.7))
 
 	self.spriteAnimation = EasyLD.spriteAnimation(self, "assets/sprites/Hero.png", 4, 0.1, 32, 32, 0, -1, "center")
 	self.spriteAnimation:play()
@@ -256,6 +263,8 @@ end
 
 function Hero:onDeath()
 	self:speak(self.randomStringOnDeath[math.random(1, #self.randomStringOnDeath)], 2.5)
+	self.sfx.death[math.random(1, #self.sfx.death)]:play()
+	self.timerDeath = EasyLD.timer.after(6, function() self.isDeadReally = true end)
 end
 
 function Hero:onDmg()
