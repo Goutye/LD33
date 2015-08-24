@@ -4,6 +4,7 @@ local Entity = require 'EasyLD.Entity'
 local Treasure = class('Treasure', Entity)
 
 function Treasure:load()
+	self.collideArea.forms[1]:attachImg(EasyLD.image:new("assets/sprites/box.png"), "center")
 end
 
 function Treasure:update(dt, entities)

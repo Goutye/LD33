@@ -27,8 +27,13 @@ function PushSlime:load()
 	self.PS:setSizes({[0] = 16,
 						[1] = 48})
 	self.spriteAnimation = EasyLD.spriteAnimation(self, "assets/sprites/PushSlime.png", 3, 0.5, 32, 32, 0, -1, "center")
+	
 	self.spriteAnimation:play()
 	self.pAnim = EasyLD.point:new(self.pos.x, self.pos.y, true)
+	self.img = EasyLD.image:new("assets/sprites/shadow.png")
+	self.pAnim2 = EasyLD.point:new(self.pos.x, self.pos.y, true)
+	self.pAnim2:attachImg(self.img, "center")
+	self.collideArea:attach(self.pAnim2)
 	self.collideArea:attach(self.pAnim)
 	self.pAnim:attachImg(self.spriteAnimation, "center")
 	self.vectorPush = EasyLD.vector:of(self.pos, self.pos)

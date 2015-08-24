@@ -17,7 +17,7 @@ function Hero:load(level)
 	self.level = level
 	self.distance = 50
 	self.dmg = 5 + level * 2
-	self.life = 20 + level * 10
+	self.life = 40 + level * 10
 	self.maxLife = 20 + level * 10
 	self.choice = nil
 	self.canAttack = true
@@ -59,6 +59,10 @@ function Hero:load(level)
 	self.spriteAnimation = EasyLD.spriteAnimation(self, "assets/sprites/Hero.png", 4, 0.1, 32, 32, 0, -1, "center")
 	self.spriteAnimation:play()
 	self.pAnim = EasyLD.point:new(self.pos.x, self.pos.y, true)
+	self.img = EasyLD.image:new("assets/sprites/shadow.png")
+	self.pAnim2 = EasyLD.point:new(self.pos.x, self.pos.y, true)
+	self.pAnim2:attachImg(self.img, "center")
+	self.collideArea:attach(self.pAnim2)
 	self.collideArea:attach(self.pAnim)
 	self.pAnim:attachImg(self.spriteAnimation, "center")
 
@@ -311,8 +315,22 @@ function Hero:speak(text, time)
 		table.insert(list, EasyLD.point:new(x + 0.4 * size, y - 36))
 		table.insert(list, EasyLD.point:new(x, y - 36))
 		table.insert(list, EasyLD.point:new(x, y - 16))
+
+
 		
 		local polygon = EasyLD.polygon:new("fill", EasyLD.color:new(20, 20, 20, 240), unpack(list))
+
+		local list2 = {}
+		table.insert(list2, EasyLD.point:new(x - 0.05 * size - 3, y - 36 + 3))
+		table.insert(list2, EasyLD.point:new(x - 0.72 * size - 3, y - 36 + 3))
+		table.insert(list2, EasyLD.point:new(x - 0.72 * size - 3, y - 76 - 3))
+		table.insert(list2, EasyLD.point:new(x + 0.4 * size +3, y - 76 - 3))
+		table.insert(list2, EasyLD.point:new(x + 0.4 * size +3, y - 36 + 3))
+		table.insert(list2, EasyLD.point:new(x, y - 36+3))
+		table.insert(list2, EasyLD.point:new(x, y - 16+3))
+
+		local polygon2 = EasyLD.polygon:new("fill", EasyLD.color:new(10, 10, 10, 240), unpack(list2))
+		polygon2:draw()
 		polygon:draw()
 		font:print(text, 20, EasyLD.box:new(x - 0.72 * size, y - 71, 1.12 * size, 20), "center", nil, EasyLD.color:new(255,255,255))
 		end
@@ -335,7 +353,7 @@ function Hero:draw()
 
 	if self.choice ~= nil then
 		--self.swordSegment:draw()
-		self.PS2:draw()
+		self.collideArea:draw()
 	end
 
 	--font:print(self.life .. "/"..self.maxLife, 16, EasyLD.box:new(self.pos.x, self.pos.y, 50, 20), nil, nil, EasyLD.color:new(0,0,255))
