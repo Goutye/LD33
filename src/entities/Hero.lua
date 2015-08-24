@@ -3,7 +3,7 @@ local Entity = require 'EasyLD.Entity'
 
 local Hero = class('Hero', Entity)
 
-Hero.firstname = {"Tirion", "John", "Sirius", "Sylvanas", "Jaime", "Mike", "Umaru", "Harry", "Hermione", "Ginny", "Haruihi", "Lelouch", "Moon", ""}
+Hero.firstname = {"Tirion", "John", "Sirius", "Sylvanas", "Jaime", "Mike", "Umaru", "Harry", "Hermione", "Ginny", "Haruihi", "Lelouch", "Moon"}
 Hero.lastname = {"Fordring", "Snow", "Black", "Windrunner", "Lannister", "Kazprzak", "chan", "Potter", "Granger", "Weasley", "Suzumiya", "Lamperouge", "Moon"}
 
 function Hero:load(level)
@@ -17,8 +17,8 @@ function Hero:load(level)
 	self.level = level
 	self.distance = 50
 	self.dmg = 5 + level * 2
-	self.life = 40 + level * 10
-	self.maxLife = 20 + level * 10
+	self.life = 20 + level * 20
+	self.maxLife = 20 + level * 20
 	self.choice = nil
 	self.canAttack = true
 	self.reloadTime = 0.5 - level *0.01

@@ -174,7 +174,7 @@ function GameScreen:update(dt)
 	if EasyLD.mouse:isPressed("r") then
 		--self.hero.gotTreasure = true
 		--self.idCurrent = #self.floors
-		self.hero.life = 0
+		--self.hero.life = 0
 	end
 	self.DM:update(dt)
 
