@@ -238,6 +238,10 @@ function Hero:findBestDir(map, mapWeight)
 		end
 	end
 
+	oldBestX, oldBestY = bestx, besty
+	if map:getInfos(bestx,y) > 0 then bestx = x end
+	if map:getInfos(x,besty) > 0 then besty = y end
+	if bestx == x and besty == y then bestx, besty = oldBestX, oldBestY end
 
 	--print(self.pos.x, self.pos.y, x, y, goalx, goaly, goal.x, goal.y)
 

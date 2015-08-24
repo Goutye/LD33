@@ -11,8 +11,11 @@ function PushSlime:load()
 	self.life = 10
 	self.maxLife = 10
 
-	self.timePush = 2
-	self.timePushFull = 2
+	self.timeDown = 0
+	self.timePush = 1.75
+	self.timePushFull = 1.75
+	self.reloadTime = 0.75
+	self.reloadTimeFull = 0.75
 
 	self.pushPolygon = EasyLD.polygon:new("fill", EasyLD.color:new(255,0,0,200), self.pos:copy(), self.pos:copy(), self.pos:copy())
 
@@ -74,15 +77,22 @@ function PushSlime:update(dt, entities, map)
 		if EasyLD.mouse:isDown("l") and self.timePush > 0 then
 			self:push(entities)
 			self.timePush = self.timePush - dt
-			if self.timePush <= 0 then
+			self.reloadTime = 0
+			self.timeDown = self.timeDown + dt
+			if self.timePush <= 0 and self.timeDown >= self.timePushFull then
 				self.isPushing = false
 				self.PS:stop()
 				self.timerPush = EasyLD.timer.after(self.timePushFull + self.timePush, function() self.timerPush, self.timePush = nil, self.timePushFull end)
 			end
 		else
+			self.timeDown = 0
 			self.isPushing = false
 			if self.timePush < self.timePushFull then
-				self.timePush = self.timePush + dt
+				if self.reloadTime >= self.reloadTimeFull then
+					self.timePush = self.timePush + dt
+				else
+					self.reloadTime = self.reloadTime + dt
+				end
 			end
 			self.PS:stop()
 		end
