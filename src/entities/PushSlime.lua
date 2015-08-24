@@ -39,11 +39,7 @@ function PushSlime:load()
 	self.vectorPush = EasyLD.vector:of(self.pos, self.pos)
 
 	self.sfx = {}
-	self.sfx.push = EasyLD.sfx:new("assets/sfx/push.wav", 0.4, nil, function()
-								if self.isPushing and self.life > 0 then
-									self.sfx.push:play()
-								end
-							end)
+	self.sfx.push = EasyLD.sfx:new("assets/sfx/push.wav", 0.4)
 end
 
 function PushSlime:update(dt, entities, map)

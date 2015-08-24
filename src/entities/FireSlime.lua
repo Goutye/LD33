@@ -5,7 +5,7 @@ local FireSlime = class('FireSlime', Entity)
 
 function FireSlime:load()
 	self.isPlayer = false
-	self.power = 140
+	self.power = 160
 	self.dmg = 5
 	self.life = 10
 	self.maxLife = 10

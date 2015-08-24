@@ -10,7 +10,7 @@ function EndScreen:initialize(gamedata)
 	self.mapsName[2] = "The foundry"
 	self.mapsName[3] = "Pillars of Arraks"
 	self.mapsName[4] = "The secret corridor"
-	self.mapsName[5] = "The Ratking's\n laboratory"
+	self.mapsName[5] = "The Ratking's laboratory"
 	self.mapsName[6] = "Treasure Halls"
 	self.heroesDefeated = gamedata.heroesDefeated
 	self.money = gamedata.money

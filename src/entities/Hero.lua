@@ -27,7 +27,7 @@ function Hero:load(level)
 
 	self.swordSegment = EasyLD.segment:new(self.pos:copy(), self.pos:copy())
 
-	self.PS = EasyLD.particles:new(self.pos, "assets/smoke2.png")
+	self.PS = EasyLD.particles:new(self.pos, "assets/smoke.png")
 	self.PS:setEmissionRate({[0] = 20, [1] = 1}, {"quadout"})
 	self.PS:setLifeTime(1)
 	self.PS:setInitialVelocity(30)
@@ -119,7 +119,7 @@ function Hero:update(dt, entities, map)
 		end
 	end
 
-	self.PS.follower:moveTo(self.pos.x, self.pos.y )--+ map.tileset.tileSizeY/2)
+	self.PS.follower:moveTo(self.pos.x, self.pos.y)--+ map.tileset.tileSizeY/2)
 	self.PS:update(dt)
 
 	if self.timeBeforeRunning > 0 then
@@ -353,6 +353,7 @@ end
 
 function Hero:draw()
 	self.PS:draw()
+	self.PS2:draw()
 
 	if self.spriteAnimation ~= nil and false then
 		--self.spriteAnimation:draw(self.pos.x, self.pos.y)

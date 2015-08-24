@@ -102,7 +102,7 @@ function GameScreen:initialize(level, gamedata, isUpgrade)
 	
 
 	self.slices[3]:addEntity(PushSlime:new(550, 370, EasyLD.area:new(EasyLD.circle:new(550, 370, 12, EasyLD.color:new(0,0,0,0)))))
-	self.slices[3]:addEntity(FireSlime:new(662, 260, EasyLD.area:new(EasyLD.circle:new(662, 260, 12, EasyLD.color:new(0,0,0,0)))))
+	self.slices[3]:addEntity(FireSlime:new(682, 260, EasyLD.area:new(EasyLD.circle:new(682, 260, 12, EasyLD.color:new(0,0,0,0)))))
 	self.slices[3]:addEntity(FireSlime:new(188, 250, EasyLD.area:new(EasyLD.circle:new(188, 250, 12, EasyLD.color:new(0,0,0,0)))))
 	self.slices[3]:addEntity(FireSlime:new(188, 440, EasyLD.area:new(EasyLD.circle:new(188, 440, 12, EasyLD.color:new(0,0,0,0)))))
 	self.slices[3]:addEntity(ExplodeSlime:new(370, 370, EasyLD.area:new(EasyLD.circle:new(370, 370, 12, EasyLD.color:new(0,0,0,0)))))
