@@ -77,7 +77,7 @@ function GameScreen:initialize(level, gamedata, isUpgrade)
 	self.maps[2].pointOfInterest = EasyLD.point:new(745,505)
 	self.maps[3].pointOfInterest = EasyLD.point:new(580, 312)
 	self.maps[4].pointOfInterest = EasyLD.point:new(618, 240)
-	self.maps[5].pointOfInterest = EasyLD.point:new(518,680)
+	self.maps[5].pointOfInterest = EasyLD.point:new(518,660)
 
 	self.player = FireSlime:new(568, 615, EasyLD.area:new(EasyLD.circle:new(568, 615, 16, EasyLD.color:new(0,0,0,0))))
 	self.player.depth = 0
