@@ -287,7 +287,11 @@ function Hero:isPointOfInterestReached(map)
 			map:putTile(10, x, y)
 		end
 		local dist = EasyLD.vector:of(self.pointOfInterest, self.pos)
-		return dist:squaredLength() < 172
+		local isUnder = dist:squaredLength() < 172
+		if isUnder then
+			self:moveTo(self.pointOfInterest.x, self.pointOfInterest.y)
+		end
+		return isUnder
 	end
 end
 
