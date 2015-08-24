@@ -174,7 +174,7 @@ function Hero:findPath(map, goal)
 	for i = 0, map.w - 1 do
 		mapWeight[i] = {}
 		for j = 0, map.h - 1 do
-			mapWeight[i][j] = 9999
+			mapWeight[i][j] = 999999
 		end
 	end
 
@@ -192,7 +192,7 @@ function Hero:findPath(map, goal)
 			if map:getInfos(pos.x, pos.y) == 0 then
 				w = w + 1
 			elseif map:getInfos(pos.x, pos.y) == 2 then
-				w = w + 5
+				w = w + 100
 			end
 
 			mapWeight[pos.x][pos.y] = pos.w
