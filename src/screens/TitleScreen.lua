@@ -97,7 +97,7 @@ function TitleScreen:draw()
 	font:printOutLine("Press [SPACE] to play!", 40, self.boxThank, "center", nil, EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
 
 	font:printOutLine("A game made by Goutye", 20, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h - 20), "right", "bottom", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
-	font:printOutLine("You are a monster - LD33", 20, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h), "right", "bottom", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
+	font:printOutLine("You are the monster - LD33", 20, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h), "right", "bottom", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
 	
 end
 

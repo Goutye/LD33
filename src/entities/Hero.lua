@@ -11,7 +11,6 @@ function Hero:load(level)
 	math.randomseed( os.time() )
 	self.firstname = Hero.firstname[math.random(1, #Hero.firstname)]
 	self.lastname = Hero.lastname[math.random(1, #Hero.lastname)]
-	print(self.firstname)
 	self.name = self.firstname .. " " .. self.lastname
 	self.isHero = true
 	self.level = level
