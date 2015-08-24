@@ -15,9 +15,9 @@ function FireSlime:load()
 	self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos:copy())
 
 	self.PS = EasyLD.particles:new(self.pos, "assets/smoke.png")
-	self.PS:setEmissionRate(200)
-	self.PS:setLifeTime(0.1)
-	self.PS:setInitialVelocity(900)
+	self.PS:setEmissionRate(400)
+	self.PS:setLifeTime(0.2)
+	self.PS:setInitialVelocity(400)
 	self.PS:setInitialAcceleration(0)
 	self.PS:setDuration(self.reloadTime)
 	self.PS:setDirection(0, math.pi/36)
@@ -41,7 +41,7 @@ function FireSlime:load()
 end
 
 function FireSlime:update(dt, entities, map)
-	local ACCELERATION = 1000
+	local ACCELERATION = 600
 
 	self.acceleration = EasyLD.point:new(0, 0)
 

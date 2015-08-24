@@ -74,9 +74,9 @@ function Hero:load(level)
 	self.pAnim:attachImg(self.spriteAnimation, "center")
 
 	self.PS2 = EasyLD.particles:new(self.pos, "assets/smoke.png")
-	self.PS2:setEmissionRate(200)
+	self.PS2:setEmissionRate(300)
 	self.PS2:setLifeTime(0.1)
-	self.PS2:setInitialVelocity(600)
+	self.PS2:setInitialVelocity(650)
 	self.PS2:setInitialAcceleration(0)
 	self.PS2:setDirection(0, math.pi/36)
 	self.PS2:setColors({[0] = EasyLD.color:new(255,255,255,150),
@@ -89,7 +89,7 @@ function Hero:load(level)
 end
 
 function Hero:update(dt, entities, map)
-	local ACCELERATION = 1000
+	local ACCELERATION = 600
 
 	self.acceleration = EasyLD.point:new(0, 0)
 
@@ -166,6 +166,9 @@ function Hero:update(dt, entities, map)
 	self.PS2.follower:moveTo(self.pos.x + vectorSword.x * self.distance/4, self.pos.y + vectorSword.y * self.distance/4)
 	self.PS2:setDirection(math.pi * 2 - vectorSword:getAngle(), math.pi/36)
 	self.PS2:update(dt)
+
+	--local v = EasyLD.vector:new(self.speed.x, self.speed.y)
+	--print(v:squaredLength())
 end
 
 function Hero:findPath(map, goal)

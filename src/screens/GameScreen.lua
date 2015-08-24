@@ -208,7 +208,7 @@ function GameScreen:update(dt)
 		self.newScreen = true
 		--self:initialize(self.hero.level + 1, {floors = self.floors, money = self.money - reduceMoney, heroesDefeated = self.heroesDefeated}, isUpgrade)
 		EasyLD:nextScreen(GameScreen:new(self.hero.level + 1, {floors = self.floors, money = self.money - reduceMoney, heroesDefeated = self.heroesDefeated}, isUpgrade), "fade", nil, 2, true, "quad")
-	elseif self.hero:isPointOfInterestReached(self.maps[self.player.depth + 1]) then
+	elseif self.hero:isPointOfInterestReached(self.maps[self.idCurrent]) then
 		self.slices[self.idCurrent]:removeEntity(self.hero)
 		self.slices[self.idCurrent + 1]:addEntity(self.hero)
 		
@@ -252,9 +252,9 @@ function GameScreen:update(dt)
 		local oldDepth = self.player.depth
 		
 		local newId = (oldId % #self.slices[self.idCurrent].entities) + 1
-		print(oldId, newId)
+		--print(oldId, newId)
 		if newId == self.hero.id then newId = (newId % #self.slices[self.idCurrent].entities) + 1 end
-		print(oldId, newId)
+		--print(oldId, newId)
 
 		if newId ~= oldId or self.player.isDead then
 			self.player.isPlayer = false

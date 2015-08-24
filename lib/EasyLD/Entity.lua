@@ -2,7 +2,7 @@ local class = require 'EasyLD.lib.middleclass'
 
 local Entity = class('Entity')
 
-local MAX_SPEED = 500
+local MAX_SPEED = 175
 local SQUARED_MAX_SPEED = MAX_SPEED * MAX_SPEED
 local FRICTION = 0.95
 

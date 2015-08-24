@@ -42,7 +42,7 @@ function ExplodeSlime:load()
 end
 
 function ExplodeSlime:update(dt, entities, map)
-	local ACCELERATION = 1000
+	local ACCELERATION = 600
 
 	self.acceleration = EasyLD.point:new(0, 0)
 

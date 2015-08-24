@@ -43,7 +43,7 @@ function PushSlime:load()
 end
 
 function PushSlime:update(dt, entities, map)
-	local ACCELERATION = 1000
+	local ACCELERATION = 600
 
 	self.acceleration = EasyLD.point:new(0, 0)
 
@@ -81,6 +81,9 @@ function PushSlime:update(dt, entities, map)
 			end
 		else
 			self.isPushing = false
+			if self.timePush < self.timePushFull then
+				self.timePush = self.timePush + dt
+			end
 			self.PS:stop()
 		end
 	else
