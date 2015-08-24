@@ -92,6 +92,14 @@ function FireSlime:update(dt, entities, map)
 			self:fire(entities)
 		end
 	else 
+		if self.hero == nil then
+			for _,e in ipairs(entities) do
+				if e.level ~= nil then
+					self.hero = e
+					break
+				end
+			end
+		end
 		self.vectorFire = EasyLD.vector:of(self.pos, self.hero.pos)
 		self.vectorFire:normalize()
 	end
