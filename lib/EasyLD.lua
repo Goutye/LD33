@@ -111,7 +111,6 @@ local function loadAPI(name)
 		loadAdapterWindow(require 'EasyLD.drystal.DrystalWindow')
 		loadAdapterCamera(require 'EasyLD.drystal.DrystalCamera')
 		loadAdapterSurface(require 'EasyLD.drystal.DrystalSurface')
-		loadAdapterPostfx(require 'EasyLD.drystal.DrystalPostfx')
 		loadAdapterShader(require 'EasyLD.drystal.DrystalShader')
 		loadAdapterParticles(require 'EasyLD.drystal.DrystalParticle')
 	elseif name == "Löve2D" then
@@ -126,9 +125,16 @@ local function loadAPI(name)
 		loadAdapterWindow(require 'EasyLD.love.LoveWindow')
 		loadAdapterCamera(require 'EasyLD.love.LoveCamera')
 		loadAdapterSurface(require 'EasyLD.love.LoveSurface')
-		loadAdapterPostfx(require 'EasyLD.love.LovePostfx')
 		loadAdapterShader(require 'EasyLD.love.LoveShader')
 		loadAdapterParticles(require 'EasyLD.love.LoveParticle')
+	end
+end
+
+function EasyLD:postLoad(name)
+	if name == "Drystal" then
+		loadAdapterPostfx(require 'EasyLD.drystal.DrystalPostfx')
+	elseif name == "Löve2D" then
+		loadAdapterPostfx(require 'EasyLD.love.LovePostfx')
 	end
 end
 

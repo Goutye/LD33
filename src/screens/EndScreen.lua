@@ -98,7 +98,7 @@ function EndScreen:update(dt)
 	self.PS:update(dt)
 	self.PS2:update(dt)
 	self.PS3:update(dt)
-	if EasyLD.keyboard:isPressed(" ") then
+	if EasyLD.keyboard:isPressed("space") then
 		EasyLD.screen:nextScreen(TitleScreen:new(), "slide", {-1,0}, 2, false, "quadinout")
 	end
 end

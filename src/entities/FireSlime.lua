@@ -64,7 +64,7 @@ function FireSlime:update(dt, entities, map)
 		self.PS:setDirection(math.pi * 2 - self.vectorFire:getAngle(), math.pi/36)
 		self.fireSegment = EasyLD.segment:new(self.pos:copy(), self.pos + (self.vectorFire * self.power), EasyLD.color:new(255,0,0))
 		
-		if EasyLD.mouse:isPressed("l") and self.canAttack then
+		if EasyLD.mouse:isPressed(1) and self.canAttack then
 			self.canAttack = false
 			self.timerAttack = EasyLD.timer.after(self.reloadTime, function() self.timerAttack, self.canAttack = nil, true end)
 			self:fire(entities)

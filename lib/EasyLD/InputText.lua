@@ -15,7 +15,7 @@ function InputText:initialize(box, colorBack, colorText, charLimit, font, size)
 end
 
 function InputText:update(dt)
-	if EasyLD.mouse:isPressed("l") then
+	if EasyLD.mouse:isPressed(1) then
 		if EasyLD.collide:AABB_point(self.box, EasyLD.mouse:getPosition()) then
 			self.focus = true
 		else

@@ -74,7 +74,7 @@ function PushSlime:update(dt, entities, map)
 		self.PS:setDirection(math.pi * 2 - self.vectorPush:getAngle(), math.pi/2)
 		self.pushPolygon = EasyLD.polygon:new("fill", EasyLD.color:new(255,0,0,200), p1, p2, self.pos:copy())
 		
-		if EasyLD.mouse:isDown("l") and self.timePush > 0 then
+		if EasyLD.mouse:isDown(1) and self.timePush > 0 then
 			self:push(entities)
 			self.timePush = self.timePush - dt
 			self.reloadTime = 0

@@ -171,7 +171,7 @@ function GameScreen:prepareTreasure()
 end
 
 function GameScreen:update(dt)
-	if EasyLD.mouse:isPressed("r") then
+	if EasyLD.mouse:isPressed(2) then
 		--self.hero.gotTreasure = true
 		--self.idCurrent = #self.floors
 		--self.hero.life = 0
@@ -247,7 +247,7 @@ function GameScreen:update(dt)
 		self.timeEntrance = 5
 	end
 
-	if EasyLD.keyboard:isPressed(" ") or (self.player.isDead and #self.slices[self.idCurrent].entities > 1) then
+	if EasyLD.keyboard:isPressed("space") or (self.player.isDead and #self.slices[self.idCurrent].entities > 1) then
 		local oldId = self.player.id
 		local oldDepth = self.player.depth
 		

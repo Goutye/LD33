@@ -62,7 +62,7 @@ function ExplodeSlime:update(dt, entities, map)
 
 		self.explodeCircle = EasyLD.circle:new(self.pos.x, self.pos.y, self.power, EasyLD.color:new(255, 0, 0, 200))
 		
-		if EasyLD.mouse:isPressed("l") or self.toExplode then
+		if EasyLD.mouse:isPressed(1) or self.toExplode then
 			self:explode(entities)
 		end
 	else

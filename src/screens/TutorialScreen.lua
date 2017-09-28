@@ -77,7 +77,7 @@ function TitleScreen:update(dt)
 	self.PS2:update(dt)
 	self.PS3:update(dt)
 
-	if EasyLD.keyboard:isPressed(" ") then
+	if EasyLD.keyboard:isPressed("space") then
 		EasyLD.screen:nextScreen(GameScreen:new(), "fade", {0,1}, 3, true, "quad")
 	end
 end

@@ -214,7 +214,6 @@ local function fusion(self, state)
 		EasyLD.screen.transitionStart = false
 	elseif state == "postfx" then
 		local s = self.postfx.s
-		s:clear()
 		s:drawOn(true)
 		self.next:draw()
 		EasyLD.surface:drawOnScreen()

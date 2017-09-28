@@ -13,11 +13,11 @@ function Mouse.getPosition()
 	return m + offset
 end
 
-function love.mousepressed(x, y, button)
+function love.mousepressed( x, y, button, istouch )
     EasyLD.mouse:buttonPressed(x,y,button)
 end
 
-function love.mousereleased(x, y, button)
+function love.mousereleased( x, y, button, istouch )
     EasyLD.mouse:buttonReleased(x,y,button)
 end
 

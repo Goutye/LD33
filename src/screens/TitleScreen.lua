@@ -77,7 +77,7 @@ function TitleScreen:update(dt)
 	self.PS2:update(dt)
 	self.PS3:update(dt)
 
-	if EasyLD.keyboard:isPressed(" ") then
+	if EasyLD.keyboard:isPressed("space") then
 		EasyLD.screen:nextScreen(TutorialScreen:new(), "slide", {-1,0}, 2, false, "quadinout")
 		--EasyLD.screen:nextScreen(TutorialScreen:new(), "cover", {0,1}, 3, false, "bounceout")
 	end
